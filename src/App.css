@@ -1,0 +1,15 @@
+/* App.css - Clean helper utilities for MondayMarket × IEDC */
+
+.iedc-grid-bg {
+  background-image: radial-gradient(rgba(204, 255, 0, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.neon-border-glow {
+  border: 1px solid rgba(204, 255, 0, 0.4);
+  box-shadow: 0 0 15px rgba(204, 255, 0, 0.2);
+}
+
+.neon-text-glow {
+  text-shadow: 0 0 15px rgba(204, 255, 0, 0.5);
+}
