@@ -70,6 +70,8 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.85rem',
               boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(204, 255, 0, 0.15)',
               transition: 'var(--transition)',
             }}
@@ -120,7 +122,7 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
         <div style={{ marginBottom: '2.25rem' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
             {/* Search Input */}
-            <div style={{ position: 'relative', flex: '1', minWidth: '280px', maxWidth: '520px' }}>
+            <div style={{ position: 'relative', flex: '1', minWidth: 'min(100%, 260px)', maxWidth: '520px' }}>
               <Search
                 size={18}
                 color="#71717a"
@@ -241,8 +243,8 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '1.75rem',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))',
+              gap: '1.5rem',
             }}
           >
             {filteredProducts.map((product) => (
@@ -257,12 +259,12 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
         <div
           style={{
             position: 'fixed',
-            bottom: '24px',
+            bottom: 'max(16px, env(safe-area-inset-bottom, 16px))',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 800,
             maxWidth: '520px',
-            width: 'calc(100% - 2rem)',
+            width: 'min(calc(100% - 1.25rem), 520px)',
             animation: 'slideUp 0.3s ease-out',
           }}
         >
@@ -272,7 +274,7 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
               backgroundColor: '#09090b',
               color: '#ffffff',
               borderRadius: '9999px',
-              padding: '0.85rem 1.5rem',
+              padding: '0.75rem clamp(0.85rem, 3vw, 1.4rem)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',

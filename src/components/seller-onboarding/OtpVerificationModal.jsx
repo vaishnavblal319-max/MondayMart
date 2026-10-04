@@ -148,7 +148,7 @@ export const OtpVerificationModal = ({
             )}
 
             {/* 6 Digit Inputs */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.65rem', marginBottom: '1.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(4px, 1.8vw, 10px)', marginBottom: '1.75rem' }}>
               {otp.map((digit, idx) => (
                 <input
                   key={idx}
@@ -160,9 +160,6 @@ export const OtpVerificationModal = ({
                   onKeyDown={(e) => handleKeyDown(idx, e)}
                   className="pin-digit-box"
                   style={{
-                    width: '46px',
-                    height: '54px',
-                    fontSize: '1.5rem',
                     textAlign: 'center',
                     border: digit ? '2px solid #ccff00' : '2px solid rgba(255, 255, 255, 0.15)',
                     backgroundColor: digit ? '#09090b' : '#181824',

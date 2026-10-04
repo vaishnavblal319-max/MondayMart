@@ -8,10 +8,11 @@ import {
   LogOut,
   User,
   Clock,
-  Sparkles,
-  ChevronDown,
   ArrowRightLeft,
   Wifi,
+  Menu,
+  X,
+  Plus,
 } from 'lucide-react';
 
 export const Navbar = ({
@@ -25,12 +26,11 @@ export const Navbar = ({
   currentView: _currentView,
   setCurrentView,
 }) => {
-  const { currentUser, logout, login, registerCustomer, pendingSellers } = useAuth();
+  const { currentUser, logout, pendingSellers } = useAuth();
   const { cart, orders } = useMarket();
-  const [showDemoMenu, setShowDemoMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const cartItemCount = Object.values(cart).reduce((sum, q) => sum + q, 0);
-
   const pendingCount = pendingSellers.filter((s) => s.status === 'pending').length;
   const activeCustomerOrders = orders.filter((o) => {
     const isActive = o.status !== 'completed' && o.status !== 'cancelled';
@@ -41,20 +41,9 @@ export const Navbar = ({
     return o.customer.id === 'guest';
   }).length;
 
-  const handleQuickDemo = (type) => {
-    setShowDemoMenu(false);
-    if (type === 'customer') {
-      // Auto-create a demo customer account if it doesn't exist yet
-      registerCustomer({ name: 'Demo Student', email: 'demo@student.com', phone: '+91 98765 43210' });
-      setCurrentView('customer');
-    } else if (type === 'seller') {
-      // Pre-approved demo seller account
-      login('freshbakes@mondaymart.in');
-      setCurrentView('seller');
-    } else if (type === 'admin') {
-      login('admin@mondaymart.in');
-      onOpenAdminApproval();
-    }
+  const handleNavAction = (action) => {
+    setMobileMenuOpen(false);
+    if (action) action();
   };
 
   return (
@@ -63,22 +52,22 @@ export const Navbar = ({
         position: 'sticky',
         top: 0,
         zIndex: 900,
-        backgroundColor: 'rgba(9, 9, 11, 0.90)',
-        backdropFilter: 'blur(16px)',
+        backgroundColor: 'rgba(9, 9, 11, 0.95)',
+        backdropFilter: 'blur(18px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         boxShadow: '0 4px 30px rgba(0, 0, 0, 0.6)',
       }}
     >
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '76px' }}>
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '74px' }}>
         {/* Brand Logo with IEDC Theme */}
         <div
-          onClick={() => setCurrentView('landing')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}
+          onClick={() => handleNavAction(() => setCurrentView('landing'))}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', flexShrink: 0 }}
         >
           <div
             style={{
-              width: '44px',
-              height: '44px',
+              width: '42px',
+              height: '42px',
               borderRadius: '12px',
               background: '#000000',
               border: '2px solid #ccff00',
@@ -87,15 +76,15 @@ export const Navbar = ({
               justifyContent: 'center',
               color: '#ccff00',
               fontWeight: 800,
-              fontSize: '1.3rem',
-              boxShadow: '0 0 18px rgba(204, 255, 0, 0.35)',
+              fontSize: '1.25rem',
+              boxShadow: '0 0 16px rgba(204, 255, 0, 0.35)',
             }}
           >
             M⚡
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              <span style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
+              <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
                 Monday<span style={{ color: '#ccff00', textShadow: '0 0 10px rgba(204, 255, 0, 0.4)' }}>Market</span>
               </span>
               <span
@@ -103,38 +92,49 @@ export const Navbar = ({
                   background: 'rgba(204, 255, 0, 0.15)',
                   color: '#ccff00',
                   border: '1px solid rgba(204, 255, 0, 0.4)',
-                  fontSize: '0.65rem',
+                  fontSize: '0.62rem',
                   fontWeight: 800,
-                  padding: '2px 7px',
-                  borderRadius: '6px',
+                  padding: '2px 6px',
+                  borderRadius: '5px',
                   letterSpacing: '0.05em',
                 }}
               >
                 IEDC
               </span>
             </div>
-            <p style={{ fontSize: '0.72rem', color: '#a1a1aa', fontWeight: 500, lineHeight: 1 }}>
+            <p className="hide-sm" style={{ fontSize: '0.7rem', color: '#a1a1aa', fontWeight: 500, lineHeight: 1 }}>
               Student Innovation & Campus Stalls
             </p>
           </div>
         </div>
 
-        {/* Center / Navigation Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {/* Local Mode Status Badge */}
-          <div
-            title="Running in local mode — data is saved in your browser"
+        {/* Center / Navigation Actions (Desktop only) */}
+        <div className="hide-mobile" style={{ alignItems: 'center', gap: '0.75rem' }}>
+          {/* Cloud Firestore Live Status Badge */}
+          <button
+            onClick={onOpenFirebaseSetup}
+            title="Connected to Firebase Cloud Firestore (monday-mart-27b80) — Click to view database details"
             style={{
               borderRadius: '9999px',
-              padding: '0.35rem 0.75rem',
+              padding: '0.4rem 0.85rem',
               fontSize: '0.75rem',
               fontWeight: 700,
-              gap: '0.45rem',
-              backgroundColor: 'rgba(6, 182, 212, 0.1)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              color: '#22d3ee',
+              gap: '0.5rem',
+              backgroundColor: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              color: '#34d399',
               display: 'flex',
               alignItems: 'center',
+              cursor: 'pointer',
+              transition: 'var(--transition)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+              e.currentTarget.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.12)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             <span
@@ -142,244 +142,229 @@ export const Navbar = ({
                 width: '7px',
                 height: '7px',
                 borderRadius: '50%',
-                backgroundColor: '#22d3ee',
-                boxShadow: '0 0 6px #22d3ee',
+                backgroundColor: '#34d399',
+                boxShadow: '0 0 8px #34d399',
               }}
             />
-            <Wifi size={13} color="#22d3ee" />
-            <span>Local Mode</span>
-          </div>
+            <Wifi size={13} color="#34d399" />
+            <span>Cloud Firestore Live</span>
+          </button>
+        </div>
 
-          {/* Quick Demo Switcher Dropdown */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowDemoMenu(!showDemoMenu)}
-              className="btn btn-secondary btn-sm"
-              style={{
-                borderRadius: '9999px',
-                borderColor: 'rgba(204, 255, 0, 0.3)',
-                backgroundColor: 'rgba(204, 255, 0, 0.08)',
-                color: '#ccff00',
-                gap: '0.35rem',
-              }}
-            >
-              <Sparkles size={14} color="#ccff00" />
-              <span>Demo Personas</span>
-              <ChevronDown size={14} />
-            </button>
-
-            {showDemoMenu && (
-              <div
+        {/* Right Side: Desktop Controls & Mobile Hamburger */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          {/* Mobile Cart Quick Icon (Always accessible on phones) */}
+          <button
+            onClick={onOpenCart}
+            className="btn btn-primary btn-sm show-mobile"
+            style={{ position: 'relative', padding: '0.45rem 0.75rem', gap: '0.35rem' }}
+          >
+            <ShoppingBag size={16} />
+            {cartItemCount > 0 && (
+              <span
                 style={{
-                  position: 'absolute',
-                  top: '120%',
-                  right: 0,
-                  background: '#121218',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '16px',
-                  boxShadow: '0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(204, 255, 0, 0.1)',
-                  padding: '0.5rem',
-                  minWidth: '250px',
-                  zIndex: 1001,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.35rem',
+                  backgroundColor: '#000000',
+                  color: '#ccff00',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  borderRadius: '9999px',
+                  padding: '0px 5px',
+                  border: '1px solid #ccff00',
                 }}
               >
-                <div style={{ padding: '0.5rem 0.75rem', fontSize: '0.72rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  IEDC Instant Persona Switcher
+                {cartItemCount}
+              </span>
+            )}
+          </button>
+
+          {/* Mobile Hamburger Toggle Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="btn btn-secondary btn-sm show-mobile"
+            style={{ padding: '0.45rem', borderColor: mobileMenuOpen ? '#ccff00' : 'rgba(255, 255, 255, 0.2)', color: mobileMenuOpen ? '#ccff00' : '#ffffff' }}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          {/* Desktop User Status / Action Buttons */}
+          <div className="hide-mobile" style={{ alignItems: 'center', gap: '0.75rem' }}>
+            {!currentUser ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <button onClick={onOpenLogin} className="btn btn-ghost btn-sm" style={{ color: '#ffffff' }}>
+                  Sign In
+                </button>
+                <button
+                  onClick={onOpenSellerRegister}
+                  className="btn btn-secondary btn-sm"
+                  style={{ borderColor: 'rgba(204, 255, 0, 0.4)', color: '#ccff00' }}
+                >
+                  <Store size={15} />
+                  <span>Launch Venture</span>
+                </button>
+                <button onClick={onOpenCustomerRegister} className="btn btn-primary btn-sm">
+                  Register
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                {/* Role Specific Actions */}
+                {currentUser.role === 'seller' ? (
+                  <>
+                    <button
+                      onClick={() => setCurrentView('customer')}
+                      className="btn btn-ghost btn-sm"
+                      title="Preview Customer Storefront"
+                      style={{ gap: '0.35rem', color: '#a1a1aa' }}
+                    >
+                      <ArrowRightLeft size={14} />
+                      <span>Customer View</span>
+                    </button>
+                    <div className="badge badge-iedc" style={{ padding: '0.4rem 0.85rem' }}>
+                      <Store size={14} />
+                      <span>{currentUser.storeName || 'Stall Hub'}</span>
+                    </div>
+                  </>
+                ) : currentUser.role === 'admin' ? (
+                  <>
+                    <button
+                      onClick={() => setCurrentView('admin')}
+                      className="btn btn-secondary btn-sm"
+                      style={{ borderColor: '#ccff00', color: '#ccff00', background: 'rgba(204, 255, 0, 0.1)' }}
+                    >
+                      <ShieldCheck size={15} />
+                      <span>IEDC Approvals ({pendingCount})</span>
+                    </button>
+                    <button
+                      onClick={() => setCurrentView('customer')}
+                      className="btn btn-ghost btn-sm"
+                      style={{ color: '#a1a1aa', gap: '0.35rem' }}
+                    >
+                      <ArrowRightLeft size={14} />
+                      <span>Marketplace View</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={onOpenOrders}
+                      className="btn btn-secondary btn-sm"
+                      style={{ position: 'relative', gap: '0.4rem' }}
+                    >
+                      <Clock size={16} />
+                      <span>My Orders</span>
+                      {activeCustomerOrders > 0 && (
+                        <span
+                          style={{
+                            backgroundColor: '#ccff00',
+                            color: '#000000',
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            borderRadius: '9999px',
+                            padding: '1px 6px',
+                            boxShadow: '0 0 10px rgba(204, 255, 0, 0.5)',
+                          }}
+                        >
+                          {activeCustomerOrders}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={onOpenCart}
+                      className="btn btn-primary btn-sm"
+                      style={{ position: 'relative', gap: '0.4rem' }}
+                    >
+                      <ShoppingBag size={16} />
+                      <span>Cart</span>
+                      {cartItemCount > 0 && (
+                        <span
+                          style={{
+                            backgroundColor: '#000000',
+                            color: '#ccff00',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            borderRadius: '9999px',
+                            padding: '1px 7px',
+                            border: '1px solid #ccff00',
+                          }}
+                        >
+                          {cartItemCount}
+                        </span>
+                      )}
+                    </button>
+                  </>
+                )}
+
+                {/* User Avatar & Logout */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.25rem' }}>
+                  <img
+                    src={
+                      currentUser.avatar ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email}`
+                    }
+                    alt={currentUser.name}
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '2px solid #ccff00',
+                      boxShadow: '0 0 10px rgba(204, 255, 0, 0.3)',
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      logout();
+                      setCurrentView('landing');
+                    }}
+                    className="btn btn-ghost btn-sm"
+                    title="Sign Out"
+                    style={{ padding: '0.4rem', color: '#71717a' }}
+                  >
+                    <LogOut size={18} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleQuickDemo('customer')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.65rem',
-                    padding: '0.65rem 0.75rem',
-                    background: 'none',
-                    border: 'none',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    transition: 'var(--transition)',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
-                >
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00' }}>
-                    <User size={15} />
-                  </div>
-                  <div>
-                    <div>Rahul (Student Customer)</div>
-                    <div style={{ fontSize: '0.72rem', color: '#a1a1aa', fontWeight: 400 }}>Browse stalls & place order</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleQuickDemo('seller')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.65rem',
-                    padding: '0.65rem 0.75rem',
-                    background: 'none',
-                    border: 'none',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    transition: 'var(--transition)',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
-                >
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00' }}>
-                    <Store size={15} />
-                  </div>
-                  <div>
-                    <div>Chef Marco (Campus Stall)</div>
-                    <div style={{ fontSize: '0.72rem', color: '#a1a1aa', fontWeight: 400 }}>freshbakes@mondaymart.in</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleQuickDemo('admin')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.65rem',
-                    padding: '0.65rem 0.75rem',
-                    background: 'none',
-                    border: 'none',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    transition: 'var(--transition)',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
-                >
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-                    <ShieldCheck size={15} />
-                  </div>
-                  <div>
-                    <div>IEDC Incubation Admin</div>
-                    <div style={{ fontSize: '0.72rem', color: '#a1a1aa', fontWeight: 400 }}>Approve ventures ({pendingCount} pending)</div>
-                  </div>
-                </button>
               </div>
             )}
           </div>
+        </div>
+      </div>
 
-          {/* User Status / Action Buttons */}
-          {!currentUser ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <button onClick={onOpenLogin} className="btn btn-ghost btn-sm" style={{ color: '#ffffff' }}>
-                Sign In
-              </button>
-              <button
-                onClick={onOpenSellerRegister}
-                className="btn btn-secondary btn-sm"
-                style={{ borderColor: 'rgba(204, 255, 0, 0.4)', color: '#ccff00' }}
-              >
-                <Store size={15} />
-                <span>Launch Venture</span>
-              </button>
-              <button onClick={onOpenCustomerRegister} className="btn btn-primary btn-sm">
-                Register
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              {/* Role Indicator & Portal Switcher */}
-              {currentUser.role === 'seller' ? (
-                <>
-                  <button
-                    onClick={() => setCurrentView('customer')}
-                    className="btn btn-ghost btn-sm"
-                    title="Preview Customer Storefront"
-                    style={{ gap: '0.35rem', color: '#a1a1aa' }}
-                  >
-                    <ArrowRightLeft size={14} />
-                    <span>Customer View</span>
-                  </button>
-                  <div className="badge badge-iedc" style={{ padding: '0.4rem 0.85rem' }}>
-                    <Store size={14} />
-                    <span>{currentUser.storeName || 'Stall Hub'}</span>
-                  </div>
-                </>
-              ) : currentUser.role === 'admin' ? (
-                <>
-                  <button
-                    onClick={onOpenAdminApproval}
-                    className="btn btn-secondary btn-sm"
-                    style={{ borderColor: '#ccff00', color: '#ccff00', background: 'rgba(204, 255, 0, 0.1)' }}
-                  >
-                    <ShieldCheck size={15} />
-                    <span>Review Ventures ({pendingCount})</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  {/* Customer view controls */}
-                  <button
-                    onClick={onOpenOrders}
-                    className="btn btn-secondary btn-sm"
-                    style={{ position: 'relative', gap: '0.4rem' }}
-                  >
-                    <Clock size={16} />
-                    <span>My Orders</span>
-                    {activeCustomerOrders > 0 && (
-                      <span
-                        style={{
-                          backgroundColor: '#ccff00',
-                          color: '#000000',
-                          fontSize: '0.7rem',
-                          fontWeight: 800,
-                          borderRadius: '9999px',
-                          padding: '1px 6px',
-                          boxShadow: '0 0 10px rgba(204, 255, 0, 0.5)',
-                        }}
-                      >
-                        {activeCustomerOrders}
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={onOpenCart}
-                    className="btn btn-primary btn-sm"
-                    style={{ position: 'relative', gap: '0.4rem' }}
-                  >
-                    <ShoppingBag size={16} />
-                    <span>Cart</span>
-                    {cartItemCount > 0 && (
-                      <span
-                        style={{
-                          backgroundColor: '#000000',
-                          color: '#ccff00',
-                          fontSize: '0.75rem',
-                          fontWeight: 800,
-                          borderRadius: '9999px',
-                          padding: '1px 7px',
-                          border: '1px solid #ccff00',
-                        }}
-                      >
-                        {cartItemCount}
-                      </span>
-                    )}
-                  </button>
-                </>
-              )}
-
-              {/* User Avatar & Logout */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.25rem' }}>
+      {/* Mobile Drawer Navigation (Slide-Down Menu for Phones & Tablets) */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-nav-drawer show-mobile"
+          style={{
+            position: 'absolute',
+            top: '74px',
+            left: 0,
+            right: 0,
+            background: 'rgba(17, 17, 22, 0.98)',
+            backdropFilter: 'blur(24px)',
+            borderBottom: '1.5px solid rgba(204, 255, 0, 0.3)',
+            padding: '1.25rem',
+            flexDirection: 'column',
+            gap: '1rem',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.95)',
+            maxHeight: 'calc(100vh - 80px)',
+            overflowY: 'auto',
+          }}
+        >
+          {/* User Profile Card if Logged In */}
+          {currentUser ? (
+            <div
+              style={{
+                background: '#14141b',
+                padding: '1rem',
+                borderRadius: '14px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <img
                   src={
                     currentUser.avatar ||
@@ -387,30 +372,141 @@ export const Navbar = ({
                   }
                   alt={currentUser.name}
                   style={{
-                    width: '36px',
-                    height: '36px',
+                    width: '42px',
+                    height: '42px',
                     borderRadius: '50%',
                     objectFit: 'cover',
                     border: '2px solid #ccff00',
-                    boxShadow: '0 0 10px rgba(204, 255, 0, 0.3)',
                   }}
                 />
-                <button
-                  onClick={() => {
-                    logout();
-                    setCurrentView('landing');
-                  }}
-                  className="btn btn-ghost btn-sm"
-                  title="Sign Out"
-                  style={{ padding: '0.4rem', color: '#71717a' }}
-                >
-                  <LogOut size={18} />
-                </button>
+                <div>
+                  <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>
+                    {currentUser.name}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>
+                    {currentUser.email}
+                  </div>
+                </div>
               </div>
+
+              <span className={currentUser.role === 'admin' ? 'badge badge-iedc' : currentUser.role === 'seller' ? 'badge badge-primary' : 'badge badge-secondary'}>
+                {currentUser.role.toUpperCase()}
+              </span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              <button
+                onClick={() => handleNavAction(onOpenLogin)}
+                className="btn btn-primary"
+                style={{ width: '100%', justifyContent: 'center' }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => handleNavAction(onOpenCustomerRegister)}
+                className="btn btn-secondary"
+                style={{ width: '100%', justifyContent: 'center' }}
+              >
+                Register as Customer
+              </button>
+              <button
+                onClick={() => handleNavAction(onOpenSellerRegister)}
+                className="btn btn-secondary"
+                style={{ width: '100%', justifyContent: 'center', borderColor: 'rgba(204, 255, 0, 0.4)', color: '#ccff00' }}
+              >
+                <Store size={16} />
+                <span>Launch Student Venture</span>
+              </button>
             </div>
           )}
+
+          {/* Quick Navigation Items */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <button
+              onClick={() => handleNavAction(() => setCurrentView('customer'))}
+              className="btn btn-ghost"
+              style={{ justifyContent: 'flex-start', gap: '0.75rem', color: '#ffffff', padding: '0.75rem' }}
+            >
+              <ShoppingBag size={18} color="#ccff00" />
+              <span>Explore Marketplace Menu</span>
+            </button>
+
+            {currentUser?.role === 'admin' && (
+              <button
+                onClick={() => handleNavAction(() => setCurrentView('admin'))}
+                className="btn btn-secondary"
+                style={{ justifyContent: 'flex-start', gap: '0.75rem', color: '#ccff00', borderColor: 'rgba(204, 255, 0, 0.4)', padding: '0.75rem' }}
+              >
+                <ShieldCheck size={18} color="#ccff00" />
+                <span>IEDC Approvals Console ({pendingCount} pending)</span>
+              </button>
+            )}
+
+            {currentUser?.role === 'seller' && (
+              <button
+                onClick={() => handleNavAction(() => setCurrentView('seller'))}
+                className="btn btn-secondary"
+                style={{ justifyContent: 'flex-start', gap: '0.75rem', color: '#ccff00', borderColor: 'rgba(204, 255, 0, 0.4)', padding: '0.75rem' }}
+              >
+                <Store size={18} color="#ccff00" />
+                <span>Seller Dashboard ({currentUser.storeName})</span>
+              </button>
+            )}
+
+            {/* Customer Orders */}
+            <button
+              onClick={() => handleNavAction(onOpenOrders)}
+              className="btn btn-ghost"
+              style={{ justifyContent: 'flex-start', gap: '0.75rem', color: '#ffffff', padding: '0.75rem' }}
+            >
+              <Clock size={18} color="#ccff00" />
+              <span>My Orders & Pickup Passes {activeCustomerOrders > 0 && `(${activeCustomerOrders})`}</span>
+            </button>
+          </div>
+
+          {/* Database Info Pill */}
+          <div style={{ paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <button
+              onClick={() => handleNavAction(onOpenFirebaseSetup)}
+              style={{
+                width: '100%',
+                padding: '0.65rem 1rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                background: 'rgba(16, 185, 129, 0.1)',
+                color: '#34d399',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399' }} />
+                <span>Cloud Firestore Live</span>
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>View Collections →</span>
+            </button>
+          </div>
+
+          {/* Sign Out on Mobile */}
+          {currentUser && (
+            <button
+              onClick={() => {
+                logout();
+                handleNavAction(() => setCurrentView('landing'));
+              }}
+              className="btn btn-ghost"
+              style={{ justifyContent: 'center', color: '#ff3355', gap: '0.5rem', marginTop: '0.25rem' }}
+            >
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+          )}
         </div>
-      </div>
+      )}
     </header>
   );
 };

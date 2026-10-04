@@ -61,8 +61,8 @@ export const AddProductModal = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="modal-body">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1.25rem' }}>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Item Name</label>
               <input
                 type="text"

@@ -12,7 +12,7 @@ Here is the exact step-by-step path to test and experience all features from scr
 
 | Role | Email Type | Purpose |
 |---|---|---|
-| **Admin** | `admin@mondaymart.in` | Reviews seller KYC applications, verifies student IDs, issues official `@mondaymart.in` seller accounts. |
+| **Admin / IEDC** | `admin@mondaymart.in` / `iedc@mondaymart.in` | Reviews seller KYC applications, verifies student IDs, issues official `@mondaymart.in` seller accounts. |
 | **Seller** | `<storename>@mondaymart.in` | Manages store inventory, adds food/products with prices and stock, fulfills orders, and verifies customer pickup PINs. |
 | **Customer** | Any personal email (e.g., `user@gmail.com`) | Browses products, adds items to cart, places orders, and receives a unique **QR Pass & 4-digit PIN** for pickup. |
 
@@ -55,8 +55,8 @@ Here is the exact step-by-step path to test and experience all features from scr
 
 1. In the top navigation bar, click **"Sign In"** (or the User icon).
 2. Enter the admin credentials:
-   - **Email:** `admin@mondaymart.in`
-   - **Password:** *(any password or leave as is)*
+   - **Email:** `admin@mondaymart.in` (Pass: `Admin123`) or `iedc@mondaymart.in` (Pass: `iedc123`)
+   - *(Note: If you manually change the password in Firebase Console, enter your new password here)*
    - Click **"Sign In"**.
 3. You will be automatically routed to the **IEDC Venture Approval Console**.
 4. Under the **Pending Verification** tab:
@@ -162,3 +162,22 @@ If you want to see your live Cloud Firestore database updating in real-time:
 - **Switching Roles Fast:** You can click the user profile icon on the top-right and click **Logout** anytime to switch between Customer, Seller, and Admin.
 - **Multiple Browsers:** Open one standard browser tab for the **Seller** and one **Incognito tab** for the **Customer** to see real-time updates without logging out!
 - **Offline / Network Resilience:** If your internet or Firebase drops momentarily, MondayMart has built-in graceful local fallback so you will not lose your progress.
+
+---
+
+## 📱 Multi-Device Adaptive Experience
+
+MondayMart is engineered with fluid, responsive layouts optimized for all device form-factors:
+
+| Device Category | Screen Resolution | Adaptive Behavior |
+|---|---|---|
+| **Compact Phones** | 320px – 380px (e.g. iPhone SE, Galaxy Mini) | Slide-down animated mobile drawer, compact responsive 6-digit OTP boxes, 1-column product & metrics grids, safe-area touch targets (&ge;44px), zero horizontal overflow. |
+| **Standard Smartphones** | 390px – 480px (e.g. iPhone 14/15, Pixel, Galaxy S) | Touch-optimized sticky floating cart bar with safe-area spacing, mobile inventory card view with 1-tap rate & stock editing, quick-tap PIN fulfillment keypad. |
+| **Tablets & iPads** | 768px – 1024px (e.g. iPad Air, Mini, Surface Pro) | Adaptive 2/3-column product showcase, balanced metrics cards, scrollable category pill navigation, modal sheets with 90vh max height and backdrop blurring. |
+| **Laptops & Desktops** | 1025px – 1920px+ | Full horizontal desktop navbar with Firestore live telemetry badge, full inventory ledger tables, multi-column analytics, side-by-side QR pass preview. |
+
+### How to Test Across Devices in Your Browser:
+1. Press `F12` (or right-click → **Inspect**).
+2. Press `Ctrl + Shift + M` (or click the device toggle icon).
+3. Select **iPhone SE (375px)**, **iPhone 14 Pro Max (430px)**, **iPad Air (820px)**, or **Responsive**.
+4. Test navigation, searching, adding to cart, checkout QR pass, and the Seller/Admin dashboards!

@@ -33,7 +33,7 @@ export const LandingPage = ({
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         }}
       >
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3.5rem', alignItems: 'center' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 'clamp(2rem, 4vw, 3.5rem)', alignItems: 'center' }}>
           {/* Left Column: Hero Pitch */}
           <div>
             <div
@@ -195,7 +195,7 @@ export const LandingPage = ({
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))', gap: '1.75rem' }}>
             {/* Customer Column */}
             <div
               style={{
@@ -345,7 +345,7 @@ export const LandingPage = ({
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: '1.5rem' }}>
             {featured.length === 0 ? (
               /* Placeholder cards shown when no products listed yet */
               [1, 2, 3, 4].map((i) => (
@@ -441,13 +441,13 @@ export const LandingPage = ({
             style={{
               background: 'linear-gradient(135deg, #111116 0%, #000000 100%)',
               borderRadius: '24px',
-              padding: '3.5rem 2.5rem',
+              padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 2.5rem)',
               color: '#ffffff',
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '2.5rem',
+              gap: '2rem',
               boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(204, 255, 0, 0.12)',
               border: '1px solid rgba(204, 255, 0, 0.4)',
             }}
