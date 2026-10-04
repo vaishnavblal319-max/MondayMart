@@ -35,8 +35,8 @@ export const AddProductModal = ({ isOpen, onClose }) => {
 
     addProduct({
       ...formData,
-      sellerStore: currentUser?.storeName || 'The Burger Guild & Bistro',
-      sellerEmail: currentUser?.email || 'freshbakes@mondaymart.in',
+      sellerStore: currentUser?.storeName || '',
+      sellerEmail: currentUser?.email     || '',
     });
 
     onClose();

@@ -13,7 +13,7 @@ export const SellerRegisterModal = ({
     phone: '',
     category: 'Fast Food',
     address: '',
-    idPhotoUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
+    idPhotoUrl: '',
   });
 
   const [previewId, setPreviewId] = useState(formData.idPhotoUrl);

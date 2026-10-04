@@ -1,63 +1,83 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initialUsers, initialPendingSellers } from '../data/demoUsers';
 import { generateSellerEmail } from '../utils/helpers';
+import {
+  db,
+  usersCol,
+  sellersCol,
+  doc,
+  setDoc,
+  onSnapshot,
+  query,
+  orderBy,
+} from '../firebase';
 
 const AuthContext = createContext();
 
-// Bump this whenever seed users change so old localStorage is wiped.
-const AUTH_VERSION = 'v4-clean';
-
-function loadFromStorage(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function initAuthStorage() {
-  const stored = localStorage.getItem('mm_auth_version');
-  if (stored !== AUTH_VERSION) {
-    ['mm_users', 'mm_pending_sellers', 'mm_current_user'].forEach((k) =>
-      localStorage.removeItem(k)
-    );
-    localStorage.setItem('mm_auth_version', AUTH_VERSION);
-  }
-}
-
 export const AuthProvider = ({ children }) => {
-  React.useMemo(() => initAuthStorage(), []);
+  const [users, setUsers]                  = useState([]);
+  const [pendingSellers, setPendingSellers] = useState([]);
+  const [currentUser, setCurrentUser]      = useState(() => {
+    try {
+      const raw = localStorage.getItem('mm_current_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
 
-  const [users, setUsers]               = useState(() => loadFromStorage('mm_users', initialUsers));
-  const [pendingSellers, setPendingSellers] = useState(() => loadFromStorage('mm_pending_sellers', initialPendingSellers));
-  const [currentUser, setCurrentUser]   = useState(() => loadFromStorage('mm_current_user', null));
+  // ─── Real-time Firestore listeners ───────────────────────────────────────────
+  useEffect(() => {
+    const unsubUsers = onSnapshot(
+      usersCol(),
+      (snap) => setUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (err) => console.warn('Users listener:', err)
+    );
 
-  // Persist
-  useEffect(() => { localStorage.setItem('mm_users',           JSON.stringify(users));          }, [users]);
-  useEffect(() => { localStorage.setItem('mm_pending_sellers', JSON.stringify(pendingSellers)); }, [pendingSellers]);
+    const unsubSellers = onSnapshot(
+      query(sellersCol(), orderBy('submittedAt', 'desc')),
+      (snap) => setPendingSellers(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (err) => console.warn('PendingSellers listener:', err)
+    );
+
+    return () => { unsubUsers(); unsubSellers(); };
+  }, []);
+
+  // ─── Persist session to localStorage ─────────────────────────────────────────
   useEffect(() => {
     if (currentUser) localStorage.setItem('mm_current_user', JSON.stringify(currentUser));
     else             localStorage.removeItem('mm_current_user');
   }, [currentUser]);
 
-  // ─── Login ────────────────────────────────────────────────────────────────
+  // ─── Write helpers ────────────────────────────────────────────────────────────
+  const saveUser = async (user) => {
+    try { await setDoc(doc(db, 'users', user.id), user, { merge: true }); }
+    catch (err) { console.warn('saveUser:', err); }
+  };
 
+  const saveSeller = async (seller) => {
+    try { await setDoc(doc(db, 'pendingSellers', seller.id), seller, { merge: true }); }
+    catch (err) { console.warn('saveSeller:', err); }
+  };
+
+  // ─── Login ────────────────────────────────────────────────────────────────────
   const login = (email, password = '') => {
     const cleanEmail = email.trim().toLowerCase();
 
-    // Admin shortcut
+    // Admin — special role, auto-created in Firestore on first login
     if (cleanEmail === 'admin@mondaymart.in') {
-      const adminUser = users.find((u) => u.role === 'admin') || {
-        id: 'user-admin', name: 'Marketplace Operations Admin',
-        email: 'admin@mondaymart.in', role: 'admin',
+      const existing = users.find((u) => u.email === cleanEmail);
+      const adminUser = existing || {
+        id:     'user-admin',
+        name:   'Admin',
+        email:  cleanEmail,
+        role:   'admin',
         avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=admin`,
+        createdAt: new Date().toISOString(),
       };
+      if (!existing) saveUser(adminUser);
       setCurrentUser(adminUser);
       return { success: true, user: adminUser, role: 'admin' };
     }
 
-    // Seller login — must have an approved @mondaymart.in account
+    // Seller — must have approved @mondaymart.in account in Firestore
     if (cleanEmail.endsWith('@mondaymart.in')) {
       const seller = users.find(
         (u) => u.email.toLowerCase() === cleanEmail && u.role === 'seller'
@@ -68,21 +88,21 @@ export const AuthProvider = ({ children }) => {
       }
       return {
         success: false,
-        error: 'Seller account not found. Make sure you have been approved by the IEDC admin.',
+        error: 'No approved seller account found for this email. Contact the admin.',
       };
     }
 
-    // Customer — existing account
+    // Customer — find existing
     const existing = users.find((u) => u.email.toLowerCase() === cleanEmail);
     if (existing) {
       setCurrentUser(existing);
       return { success: true, user: existing, role: existing.role };
     }
 
-    // Customer — auto-register on first login (email-only, no password required for demo)
-    const namePart     = cleanEmail.split('@')[0];
+    // Customer — first login auto-creates account
+    const namePart      = cleanEmail.split('@')[0];
     const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-    const newCustomer  = {
+    const newCustomer   = {
       id:        `user-c-${Date.now()}`,
       name:      formattedName,
       email:     cleanEmail,
@@ -91,13 +111,12 @@ export const AuthProvider = ({ children }) => {
       avatar:    `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanEmail}`,
       createdAt: new Date().toISOString(),
     };
-    setUsers((prev) => [...prev, newCustomer]);
+    saveUser(newCustomer);
     setCurrentUser(newCustomer);
     return { success: true, user: newCustomer, role: 'customer' };
   };
 
-  // ─── Register Customer ────────────────────────────────────────────────────
-
+  // ─── Register Customer ────────────────────────────────────────────────────────
   const registerCustomer = ({ name, email, phone, password = '' }) => {
     const cleanEmail = email.trim().toLowerCase();
     const existing   = users.find((u) => u.email.toLowerCase() === cleanEmail);
@@ -110,39 +129,35 @@ export const AuthProvider = ({ children }) => {
       name:      name.trim(),
       email:     cleanEmail,
       phone:     phone || '',
-      password:  password || '',
       role:      'customer',
       avatar:    `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
       createdAt: new Date().toISOString(),
     };
-    setUsers((prev) => [...prev, newCustomer]);
+    saveUser(newCustomer);
     setCurrentUser(newCustomer);
     return { success: true, user: newCustomer };
   };
 
-  // ─── Seller Onboarding ────────────────────────────────────────────────────
-
+  // ─── Seller Onboarding ────────────────────────────────────────────────────────
   const submitSellerApplication = (appData) => {
     const id = `req-${Date.now()}`;
     const newApp = {
       id,
-      ownerName:     appData.ownerName,
-      storeName:     appData.storeName,
-      personalEmail: appData.personalEmail.trim().toLowerCase(),
-      phone:         appData.phone,
-      category:      appData.category || 'General Food & Bakes',
-      address:       appData.address  || 'Campus Stall',
-      idPhotoUrl:    appData.idPhotoUrl ||
-                     'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
-      submittedAt:   new Date().toISOString(),
+      ownerName:       appData.ownerName,
+      storeName:       appData.storeName,
+      personalEmail:   appData.personalEmail.trim().toLowerCase(),
+      phone:           appData.phone,
+      category:        appData.category || 'General',
+      address:         appData.address  || 'Campus',
+      idPhotoUrl:      appData.idPhotoUrl || '',
+      submittedAt:     new Date().toISOString(),
       isPhoneVerified: true,
-      status:        'pending',
+      status:          'pending',
     };
-    setPendingSellers((prev) => [newApp, ...prev]);
+    saveSeller(newApp);
     return { success: true, application: newApp };
   };
 
-  // Admin approves — generates official @mondaymart.in seller account
   const approveSeller = (requestId) => {
     const target = pendingSellers.find((r) => r.id === requestId);
     if (!target) return { success: false, error: 'Request not found' };
@@ -151,38 +166,30 @@ export const AuthProvider = ({ children }) => {
     const tempPassword = `seller${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newSellerUser = {
-      id:           `user-s-${Date.now()}`,
-      name:         target.ownerName,
-      email:        sellerEmail,
+      id:            `user-s-${Date.now()}`,
+      name:          target.ownerName,
+      email:         sellerEmail,
       personalEmail: target.personalEmail,
-      phone:        target.phone,
-      role:         'seller',
-      storeName:    target.storeName,
-      category:     target.category,
-      address:      target.address,
-      avatar:       `https://api.dicebear.com/7.x/identicon/svg?seed=${sellerEmail}`,
+      phone:         target.phone,
+      role:          'seller',
+      storeName:     target.storeName,
+      category:      target.category,
+      address:       target.address,
+      avatar:        `https://api.dicebear.com/7.x/identicon/svg?seed=${sellerEmail}`,
       tempPassword,
-      approvedAt:   new Date().toISOString(),
+      approvedAt:    new Date().toISOString(),
     };
 
-    setUsers((prev) => [...prev, newSellerUser]);
-    setPendingSellers((prev) =>
-      prev.map((s) =>
-        s.id === requestId
-          ? { ...s, status: 'approved', assignedEmail: sellerEmail, tempPassword }
-          : s
-      )
-    );
+    saveUser(newSellerUser);
+    saveSeller({ ...target, status: 'approved', assignedEmail: sellerEmail, tempPassword });
 
     return { success: true, sellerEmail, tempPassword, sellerUser: newSellerUser };
   };
 
   const rejectSeller = (requestId, reason = 'Documentation incomplete') => {
-    setPendingSellers((prev) =>
-      prev.map((s) =>
-        s.id === requestId ? { ...s, status: 'rejected', rejectReason: reason } : s
-      )
-    );
+    const target = pendingSellers.find((r) => r.id === requestId);
+    if (!target) return { success: false };
+    saveSeller({ ...target, status: 'rejected', rejectReason: reason });
     return { success: true };
   };
 

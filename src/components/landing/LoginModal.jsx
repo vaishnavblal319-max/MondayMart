@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, Mail, Store, User, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
+import { X, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSellerRegister, onSuccessLogin }) => {
@@ -28,11 +28,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
     }
   };
 
-  const handleQuickFill = (demoEmail) => {
-    setEmail(demoEmail);
-    setPassword('password123');
-    setError('');
-  };
+
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -92,10 +88,13 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
             </div>
             <ul style={{ paddingLeft: '1.2rem', margin: 0, color: '#a1a1aa' }}>
               <li>
-                <strong style={{ color: '#ffffff' }}>Student Stalls:</strong> Log in with your approved <code>@mondaymart.in</code> email.
+                <strong style={{ color: '#ffffff' }}>Sellers:</strong> Log in with your approved <code>@mondaymart.in</code> email.
               </li>
               <li>
-                <strong style={{ color: '#ffffff' }}>Campus Customers:</strong> Log in with your personal email (e.g. gmail).
+                <strong style={{ color: '#ffffff' }}>Customers:</strong> Log in with your personal email.
+              </li>
+              <li>
+                <strong style={{ color: '#ffffff' }}>Admin:</strong> Log in with <code>admin@mondaymart.in</code>.
               </li>
             </ul>
           </div>
@@ -117,14 +116,14 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password <span style={{ color: '#71717a', fontWeight: 400 }}>(any value accepted in demo)</span></label>
+            <label className="form-label">Password</label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="password"
                 className="form-input"
                 style={{ paddingLeft: '2.5rem' }}
-                placeholder="demo mode — any password works"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -136,41 +135,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
             <ArrowRight size={16} />
           </button>
 
-          {/* Quick Demo Pre-fills */}
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a1a1aa', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              ⚡ Instant Demo Credentials:
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('demo@student.com')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.75rem', padding: '0.45rem 0.25rem', gap: '0.3rem' }}
-              >
-                <User size={13} color="#06b6d4" />
-                <span>Customer</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('freshbakes@mondaymart.in')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.75rem', padding: '0.45rem 0.25rem', gap: '0.3rem' }}
-              >
-                <Store size={13} color="#ccff00" />
-                <span>Seller</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin@mondaymart.in')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.75rem', padding: '0.45rem 0.25rem', gap: '0.3rem' }}
-              >
-                <ShieldCheck size={13} color="#34d399" />
-                <span>Admin</span>
-              </button>
-            </div>
-          </div>
+
         </form>
 
         <div className="modal-footer" style={{ justifyContent: 'center', fontSize: '0.85rem', color: '#a1a1aa', backgroundColor: '#0d0d12' }}>
