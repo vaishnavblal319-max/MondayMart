@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import confetti from 'canvas-confetti';
 import {
   CheckCircle2,
   User,
@@ -8,6 +9,7 @@ import {
   AlertCircle,
   ChefHat,
   Bell,
+  Sparkles,
 } from 'lucide-react';
 import { useMarket } from '../../context/MarketContext';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
@@ -18,25 +20,53 @@ export const OrderTicket = ({ order }) => {
   const [pinInput, setPinInput] = useState('');
   const [error, setError] = useState('');
   const [showQr, setShowQr] = useState(false);
+  const [isWrongPin, setIsWrongPin] = useState(false);
 
   const handleVerify = (e) => {
     e.preventDefault();
     setError('');
-    if (!pinInput.trim()) {
+    setIsWrongPin(false);
+
+    const clean = pinInput.trim();
+    if (!clean) {
       setError('Please enter the 4-digit PIN');
+      setIsWrongPin(true);
+      setTimeout(() => setIsWrongPin(false), 800);
       return;
     }
 
-    const result = verifyOrderPin(order.id, pinInput);
+    const result = verifyOrderPin(order.id, clean);
     if (!result.success) {
-      setError(result.error);
+      setError(result.error || 'Incorrect PIN! Check with customer.');
+      setIsWrongPin(true);
+      setTimeout(() => setIsWrongPin(false), 900);
     } else {
       setPinInput('');
+      try {
+        confetti({
+          particleCount: 75,
+          spread: 70,
+          origin: { y: 0.7 },
+          colors: ['#10b981', '#ccff00', '#ffffff', '#34d399'],
+        });
+      } catch (err) {}
     }
   };
 
   const handleQuickVerify = () => {
-    verifyOrderPin(order.id, order.pin);
+    setError('');
+    setIsWrongPin(false);
+    const result = verifyOrderPin(order.id, order.pin);
+    if (result.success) {
+      try {
+        confetti({
+          particleCount: 75,
+          spread: 70,
+          origin: { y: 0.7 },
+          colors: ['#10b981', '#ccff00', '#ffffff', '#34d399'],
+        });
+      } catch (err) {}
+    }
   };
 
   const isCompleted = order.status === 'completed';
@@ -203,17 +233,20 @@ export const OrderTicket = ({ order }) => {
         {/* Verification Section */}
         {!isCompleted ? (
           <div
+            className={isWrongPin ? 'shake-error' : ''}
             style={{
-              background: '#181824',
-              border: '1.5px dashed rgba(204, 255, 0, 0.45)',
+              background: isWrongPin ? 'rgba(255, 51, 85, 0.08)' : '#181824',
+              border: isWrongPin ? '2px solid #ff3355' : '1.5px dashed rgba(204, 255, 0, 0.45)',
               borderRadius: '14px',
               padding: '1rem',
               marginTop: 'auto',
+              boxShadow: isWrongPin ? '0 0 25px rgba(255, 51, 85, 0.4)' : 'none',
+              transition: 'border-color 0.2s, box-shadow 0.2s',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 700, color: '#ffffff' }}>
-                <ShieldCheck size={16} color="#ccff00" />
+                <ShieldCheck size={16} color={isWrongPin ? '#ff3355' : '#ccff00'} />
                 <span>Verify Pickup with Customer PIN</span>
               </div>
               <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>
@@ -222,9 +255,23 @@ export const OrderTicket = ({ order }) => {
             </div>
 
             {error && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#ff3355', fontSize: '0.78rem', marginBottom: '0.5rem', fontWeight: 600 }}>
-                <AlertCircle size={14} />
-                <span>{error}</span>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  color: '#ff3355',
+                  fontSize: '0.82rem',
+                  marginBottom: '0.65rem',
+                  fontWeight: 700,
+                  background: 'rgba(255, 51, 85, 0.15)',
+                  border: '1px solid rgba(255, 51, 85, 0.4)',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '8px',
+                }}
+              >
+                <AlertCircle size={16} flexShrink={0} />
+                <span>❌ WRONG PIN! {error}</span>
               </div>
             )}
 
@@ -234,7 +281,10 @@ export const OrderTicket = ({ order }) => {
                 maxLength={4}
                 placeholder="PIN"
                 value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
+                onChange={(e) => {
+                  setPinInput(e.target.value);
+                  if (error) setError('');
+                }}
                 style={{
                   width: '110px',
                   textAlign: 'center',
@@ -243,13 +293,24 @@ export const OrderTicket = ({ order }) => {
                   fontSize: '1.15rem',
                   letterSpacing: '0.15em',
                   borderRadius: '8px',
-                  border: '1.5px solid #ccff00',
-                  background: '#09090b',
-                  color: '#ccff00',
+                  border: isWrongPin ? '2px solid #ff3355' : '1.5px solid #ccff00',
+                  background: isWrongPin ? 'rgba(255, 51, 85, 0.15)' : '#09090b',
+                  color: isWrongPin ? '#ff3355' : '#ccff00',
                   padding: '0.45rem',
+                  boxShadow: isWrongPin ? '0 0 10px rgba(255, 51, 85, 0.5)' : 'none',
+                  transition: 'var(--transition)',
                 }}
               />
-              <button type="submit" className="btn btn-primary btn-sm" style={{ flex: 1 }}>
+              <button
+                type="submit"
+                className="btn btn-primary btn-sm"
+                style={{
+                  flex: 1,
+                  background: isWrongPin ? '#ff3355' : 'var(--primary)',
+                  borderColor: isWrongPin ? '#ff3355' : 'var(--primary)',
+                  color: isWrongPin ? '#ffffff' : '#000000',
+                }}
+              >
                 <span>Verify & Fulfill</span>
               </button>
             </form>
@@ -274,22 +335,42 @@ export const OrderTicket = ({ order }) => {
           </div>
         ) : (
           <div
+            className="success-pop glow-success"
             style={{
-              background: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(16, 185, 129, 0.35)',
-              borderRadius: '12px',
-              padding: '0.85rem',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.12) 100%)',
+              border: '2px solid #10b981',
+              borderRadius: '14px',
+              padding: '1.1rem 1rem',
               textAlign: 'center',
               color: '#34d399',
               marginTop: 'auto',
+              boxShadow: '0 0 30px rgba(16, 185, 129, 0.35)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: 800, fontSize: '0.9rem' }}>
-              <CheckCircle2 size={18} />
-              <span>STALL ORDER VERIFIED & FULFILLED</span>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                background: '#10b981',
+                color: '#000000',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 0.5rem',
+                boxShadow: '0 0 16px rgba(16, 185, 129, 0.7)',
+              }}
+            >
+              <CheckCircle2 size={26} strokeWidth={2.6} />
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#a1a1aa', marginTop: '0.2rem' }}>
-              Authenticated via PIN <strong>{order.pin}</strong> • {formatDateTime(order.verifiedAt)}
+            <div style={{ fontWeight: 800, fontSize: '1rem', color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
+              🎉 ORDER DELIVERED & COLLECTED!
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700, marginTop: '0.2rem' }}>
+              Customer PIN {order.pin} Verified • Handover Complete
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#a1a1aa', marginTop: '0.3rem' }}>
+              Handed over to <strong>{order.customer.name}</strong> • {formatDateTime(order.verifiedAt || Date.now())}
             </div>
           </div>
         )}

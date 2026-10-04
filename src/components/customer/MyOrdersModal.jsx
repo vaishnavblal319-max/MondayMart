@@ -5,12 +5,10 @@ import { useAuth } from '../../context/AuthContext';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
 import { QRCodeDisplay } from '../common/QRCodeDisplay';
 
-export const MyOrdersModal = ({ isOpen, onClose }) => {
+export const MyOrdersModal = ({ isOpen, onClose, initialOrderId }) => {
   const { orders } = useMarket();
   const { currentUser } = useAuth();
   const [selectedOrder, setSelectedOrder] = useState(null);
-
-  if (!isOpen) return null;
 
   const userOrders = orders.filter((o) => {
     if (currentUser?.role === 'admin') return true;
@@ -22,6 +20,28 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
     }
     return o.customer.id === 'guest';
   });
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialOrderId) {
+        const found = userOrders.find((o) => o.id === initialOrderId);
+        if (found) {
+          setSelectedOrder(found);
+          return;
+        }
+      }
+      const active = userOrders.filter(
+        (o) => o.status !== 'completed' && o.status !== 'cancelled'
+      );
+      if (active.length === 1) {
+        setSelectedOrder(active[0]);
+      }
+    } else {
+      setSelectedOrder(null);
+    }
+  }, [isOpen, initialOrderId]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -52,11 +72,11 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
                 ← Back to All Orders
               </button>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.75rem', alignItems: 'center' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1.25rem', alignItems: 'center' }}>
                 <QRCodeDisplay
                   value={selectedOrder.qrPayload}
                   pin={selectedOrder.pin}
-                  size={180}
+                  size={160}
                   showPinPill={true}
                 />
 
@@ -148,7 +168,7 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
                       {/* Show quick PIN preview */}
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: '0.7rem', color: '#71717a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>

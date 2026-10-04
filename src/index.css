@@ -413,11 +413,13 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(145deg, #121218, #0b0b0e);
   border: 2px dashed rgba(204, 255, 0, 0.45);
   border-radius: var(--radius-lg);
-  padding: 1.75rem;
+  padding: clamp(0.9rem, 3vw, 1.5rem);
   text-align: center;
   position: relative;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(204, 255, 0, 0.04);
   overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pin-pill {
@@ -495,6 +497,79 @@ h1, h2, h3, h4, h5, h6 {
 
 .pulse-animation {
   animation: pulseNeon 2.5s infinite;
+}
+
+/* Shake Animation for Wrong PIN */
+@keyframes shakeError {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  15%, 45%, 75% {
+    transform: translateX(-9px);
+  }
+  30%, 60%, 90% {
+    transform: translateX(9px);
+  }
+}
+
+.shake-error {
+  animation: shakeError 0.45s ease-in-out;
+}
+
+/* Celebratory Delivery Success Pop */
+@keyframes successPop {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  70% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-pop {
+  animation: successPop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Ripple Pulse for Live Delivered Badge */
+@keyframes ripplePulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.75);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 18px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.ripple-success {
+  animation: ripplePulse 1.9s infinite;
+}
+
+/* Glowing Success Check Ring */
+@keyframes glowSuccess {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(16, 185, 129, 0.85), inset 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+}
+
+.glow-success {
+  animation: glowSuccess 2s infinite ease-in-out;
 }
 
 /* ==========================================================================
