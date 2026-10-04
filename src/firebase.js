@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
 import {
   getFirestore,
   collection,
@@ -11,32 +12,38 @@ import {
   query,
   orderBy,
   getDocs,
+  getDoc,
   serverTimestamp,
+  where,
 } from 'firebase/firestore';
 
-// Your Firebase project config
+// Firebase project configuration — loaded from .env (VITE_ prefix required by Vite)
 const firebaseConfig = {
-  apiKey: "AIzaSyD7W7-6NCyb84AnIQ4_9cv42yGK-MkJB9Y",
-  authDomain: "monday-market-8cf15.firebaseapp.com",
-  projectId: "monday-market-8cf15",
-  storageBucket: "monday-market-8cf15.firebasestorage.app",
-  messagingSenderId: "528892428321",
-  appId: "1:528892428321:web:565a0336198759749ae360",
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Cloud Firestore
+// Initialize Analytics (only in browser environments)
+export const analytics = getAnalytics(app);
+
+// Initialize Cloud Firestore (NOT Realtime Database — this project uses Firestore)
 export const db = getFirestore(app);
 
-// Firestore collection references
-export const usersCol      = () => collection(db, 'users');
-export const sellersCol    = () => collection(db, 'pendingSellers');
-export const productsCol   = () => collection(db, 'products');
-export const ordersCol     = () => collection(db, 'orders');
+// ─── Firestore collection references ──────────────────────────────────────────
+export const usersCol    = () => collection(db, 'users');
+export const sellersCol  = () => collection(db, 'pendingSellers');
+export const productsCol = () => collection(db, 'products');
+export const ordersCol   = () => collection(db, 'orders');
 
-// Re-export Firestore helpers
+// ─── Re-export Firestore helpers ───────────────────────────────────────────────
 export {
   collection,
   doc,
@@ -48,5 +55,7 @@ export {
   query,
   orderBy,
   getDocs,
+  getDoc,
   serverTimestamp,
+  where,
 };

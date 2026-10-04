@@ -1,188 +1,332 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initialUsers, initialPendingSellers } from '../data/demoUsers';
 import { generateSellerEmail } from '../utils/helpers';
+import {
+  db,
+  usersCol,
+  sellersCol,
+  doc,
+  setDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+  orderBy,
+} from '../firebase';
 
 const AuthContext = createContext();
 
-// Bump this whenever seed users change so old localStorage is wiped.
-const AUTH_VERSION = 'v4-clean';
-
-function loadFromStorage(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function initAuthStorage() {
-  const stored = localStorage.getItem('mm_auth_version');
-  if (stored !== AUTH_VERSION) {
-    ['mm_users', 'mm_pending_sellers', 'mm_current_user'].forEach((k) =>
-      localStorage.removeItem(k)
-    );
-    localStorage.setItem('mm_auth_version', AUTH_VERSION);
-  }
-}
+// Recognized Admin / IEDC accounts and their bootstrap initial passwords
+const ADMIN_ACCOUNTS = {
+  'admin@mondaymart.in': {
+    id: 'user-admin',
+    name: 'IEDC Admin',
+    defaultPass: 'Admin123',
+  },
+  'iedc@mondaymart.in': {
+    id: 'user-iedc',
+    name: 'IEDC Executive',
+    defaultPass: 'iedc123',
+  },
+  'iedc@mondymart.in': {
+    id: 'user-iedc-alt',
+    name: 'IEDC Executive',
+    defaultPass: 'iedc123',
+  },
+};
 
 export const AuthProvider = ({ children }) => {
-  React.useMemo(() => initAuthStorage(), []);
+  const [users, setUsers]                  = useState([]);
+  const [pendingSellers, setPendingSellers] = useState([]);
+  const [currentUser, setCurrentUser]      = useState(() => {
+    try {
+      const raw = localStorage.getItem('mm_current_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
 
-  const [users, setUsers]               = useState(() => loadFromStorage('mm_users', initialUsers));
-  const [pendingSellers, setPendingSellers] = useState(() => loadFromStorage('mm_pending_sellers', initialPendingSellers));
-  const [currentUser, setCurrentUser]   = useState(() => loadFromStorage('mm_current_user', null));
-
-  // Persist
-  useEffect(() => { localStorage.setItem('mm_users',           JSON.stringify(users));          }, [users]);
-  useEffect(() => { localStorage.setItem('mm_pending_sellers', JSON.stringify(pendingSellers)); }, [pendingSellers]);
+  // ─── Real-time Firestore listeners ───────────────────────────────────────────
   useEffect(() => {
-    if (currentUser) localStorage.setItem('mm_current_user', JSON.stringify(currentUser));
-    else             localStorage.removeItem('mm_current_user');
+    const unsubUsers = onSnapshot(
+      usersCol(),
+      (snap) => {
+        const loaded = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setUsers(loaded);
+      },
+      (err) => console.warn('Users listener:', err)
+    );
+
+    const unsubSellers = onSnapshot(
+      query(sellersCol(), orderBy('submittedAt', 'desc')),
+      (snap) => {
+        const loaded = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setPendingSellers(loaded);
+      },
+      (err) => console.warn('PendingSellers listener:', err)
+    );
+
+    return () => {
+      unsubUsers();
+      unsubSellers();
+    };
+  }, []);
+
+  // ─── Persist session to localStorage ─────────────────────────────────────────
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('mm_current_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('mm_current_user');
+    }
   }, [currentUser]);
 
-  // ─── Login ────────────────────────────────────────────────────────────────
+  // Keep currentUser synced if user record in Firestore updates (e.g. name or role edit)
+  useEffect(() => {
+    if (currentUser && users.length > 0) {
+      const matched = users.find((u) => u.id === currentUser.id || u.email?.toLowerCase() === currentUser.email?.toLowerCase());
+      if (matched && JSON.stringify(matched) !== JSON.stringify(currentUser)) {
+        setCurrentUser(matched);
+      }
+    }
+  }, [users]);
 
-  const login = (email, password = '') => {
-    const cleanEmail = email.trim().toLowerCase();
+  // ─── Write helpers ────────────────────────────────────────────────────────────
+  const saveUser = async (user) => {
+    try {
+      await setDoc(doc(db, 'users', user.id), user, { merge: true });
+    } catch (err) {
+      console.warn('saveUser error:', err);
+    }
+  };
 
-    // Admin shortcut
-    if (cleanEmail === 'admin@mondaymart.in') {
-      const adminUser = users.find((u) => u.role === 'admin') || {
-        id: 'user-admin', name: 'Marketplace Operations Admin',
-        email: 'admin@mondaymart.in', role: 'admin',
-        avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=admin`,
-      };
-      setCurrentUser(adminUser);
-      return { success: true, user: adminUser, role: 'admin' };
+  const saveSeller = async (seller) => {
+    try {
+      await setDoc(doc(db, 'pendingSellers', seller.id), seller, { merge: true });
+    } catch (err) {
+      console.warn('saveSeller error:', err);
+    }
+  };
+
+  // ─── Helper: Find user in Firestore directly (for freshest console updates) ───
+  const findUserByEmail = async (cleanEmail) => {
+    try {
+      const q = query(usersCol(), where('email', '==', cleanEmail));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        return { id: snap.docs[0].id, ...snap.docs[0].data() };
+      }
+    } catch (err) {
+      console.warn('findUserByEmail Firestore query error:', err);
     }
 
-    // Seller login — must have an approved @mondaymart.in account
-    if (cleanEmail.endsWith('@mondaymart.in')) {
-      const seller = users.find(
-        (u) => u.email.toLowerCase() === cleanEmail && u.role === 'seller'
-      );
-      if (seller) {
-        setCurrentUser(seller);
-        return { success: true, user: seller, role: 'seller' };
+    // Fall back to in-memory state
+    const fromMemory = users.find((u) => u.email?.toLowerCase() === cleanEmail);
+    if (fromMemory) return fromMemory;
+
+    return null;
+  };
+
+  // ─── Login ────────────────────────────────────────────────────────────────────
+  const login = async (email, password = '') => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = (password || '').trim();
+
+    if (!cleanEmail) {
+      return { success: false, error: 'Please enter your email address.' };
+    }
+    if (!cleanPassword) {
+      return { success: false, error: 'Please enter your password.' };
+    }
+
+    // ── 1. Admin / IEDC Accounts ──
+    const adminConfig = ADMIN_ACCOUNTS[cleanEmail];
+    if (adminConfig) {
+      let adminRecord = await findUserByEmail(cleanEmail);
+
+      if (!adminRecord) {
+        // Database was cleared and no admin record exists in Firestore yet
+        // Check initial bootstrap password
+        if (cleanPassword !== adminConfig.defaultPass) {
+          return {
+            success: false,
+            error: `Incorrect password for ${cleanEmail}. (Initial password is "${adminConfig.defaultPass}")`,
+          };
+        }
+
+        adminRecord = {
+          id:        adminConfig.id,
+          name:      adminConfig.name,
+          email:     cleanEmail,
+          role:      'admin',
+          password:  adminConfig.defaultPass,
+          avatar:    `https://api.dicebear.com/7.x/identicon/svg?seed=${cleanEmail}`,
+          createdAt: new Date().toISOString(),
+        };
+        await saveUser(adminRecord);
+      } else {
+        // Document exists in Firestore!
+        // Respect the password stored in Firestore (or fallback if empty)
+        const expectedPass = adminRecord.password || adminConfig.defaultPass;
+        if (cleanPassword !== expectedPass) {
+          return { success: false, error: 'Incorrect password for this admin account.' };
+        }
       }
+
+      setCurrentUser(adminRecord);
+      return { success: true, user: adminRecord, role: 'admin' };
+    }
+
+    // ── 2. Seller Login (@mondaymart.in) ──
+    if (cleanEmail.endsWith('@mondaymart.in')) {
+      const seller = await findUserByEmail(cleanEmail);
+
+      if (!seller || seller.role !== 'seller') {
+        return {
+          success: false,
+          error: 'No approved seller account found with this email. Please apply through seller registration and wait for admin approval.',
+        };
+      }
+
+      // Check against current Firestore password
+      const expectedPass = seller.password || seller.tempPassword;
+      if (expectedPass && cleanPassword !== expectedPass) {
+        return { success: false, error: 'Incorrect password for this seller account.' };
+      }
+
+      setCurrentUser(seller);
+      return { success: true, user: seller, role: 'seller' };
+    }
+
+    // ── 3. Customer Login (personal email) ──
+    const customer = await findUserByEmail(cleanEmail);
+
+    if (!customer) {
       return {
         success: false,
-        error: 'Seller account not found. Make sure you have been approved by the IEDC admin.',
+        error: 'No account found with this email in the database. Please click "Register as Customer" to create an account.',
       };
     }
 
-    // Customer — existing account
-    const existing = users.find((u) => u.email.toLowerCase() === cleanEmail);
-    if (existing) {
-      setCurrentUser(existing);
-      return { success: true, user: existing, role: existing.role };
+    // Check against current Firestore password
+    if (customer.password && cleanPassword !== customer.password) {
+      return { success: false, error: 'Incorrect password for this account.' };
     }
 
-    // Customer — auto-register on first login (email-only, no password required for demo)
-    const namePart     = cleanEmail.split('@')[0];
-    const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-    const newCustomer  = {
+    setCurrentUser(customer);
+    return { success: true, user: customer, role: customer.role || 'customer' };
+  };
+
+  // ─── Register Customer ────────────────────────────────────────────────────────
+  const registerCustomer = async ({ name, email, phone, password = '' }) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName  = name.trim();
+    const cleanPhone = (phone || '').trim();
+    const cleanPass  = password.trim();
+
+    if (!cleanName) {
+      return { success: false, error: 'Please enter your full name.' };
+    }
+    if (!cleanEmail) {
+      return { success: false, error: 'Please enter a valid email address.' };
+    }
+    if (!cleanPass) {
+      return { success: false, error: 'Please create a password for your account.' };
+    }
+
+    // Check if account already exists in Firestore
+    const existing = await findUserByEmail(cleanEmail);
+    if (existing) {
+      return {
+        success: false,
+        error: 'An account with this email already exists. Please sign in with your password.',
+      };
+    }
+
+    const newCustomer = {
       id:        `user-c-${Date.now()}`,
-      name:      formattedName,
+      name:      cleanName,
       email:     cleanEmail,
-      phone:     '',
+      phone:     cleanPhone,
+      password:  cleanPass,
       role:      'customer',
-      avatar:    `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanEmail}`,
+      avatar:    `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanName}`,
       createdAt: new Date().toISOString(),
     };
-    setUsers((prev) => [...prev, newCustomer]);
+
+    await saveUser(newCustomer);
     setCurrentUser(newCustomer);
     return { success: true, user: newCustomer, role: 'customer' };
   };
 
-  // ─── Register Customer ────────────────────────────────────────────────────
-
-  const registerCustomer = ({ name, email, phone, password = '' }) => {
-    const cleanEmail = email.trim().toLowerCase();
-    const existing   = users.find((u) => u.email.toLowerCase() === cleanEmail);
-    if (existing) {
-      setCurrentUser(existing);
-      return { success: true, user: existing };
-    }
-    const newCustomer = {
-      id:        `user-c-${Date.now()}`,
-      name:      name.trim(),
-      email:     cleanEmail,
-      phone:     phone || '',
-      password:  password || '',
-      role:      'customer',
-      avatar:    `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
-      createdAt: new Date().toISOString(),
-    };
-    setUsers((prev) => [...prev, newCustomer]);
-    setCurrentUser(newCustomer);
-    return { success: true, user: newCustomer };
-  };
-
-  // ─── Seller Onboarding ────────────────────────────────────────────────────
-
-  const submitSellerApplication = (appData) => {
+  // ─── Seller Onboarding ────────────────────────────────────────────────────────
+  const submitSellerApplication = async (appData) => {
+    const cleanEmail = appData.personalEmail.trim().toLowerCase();
     const id = `req-${Date.now()}`;
     const newApp = {
       id,
-      ownerName:     appData.ownerName,
-      storeName:     appData.storeName,
-      personalEmail: appData.personalEmail.trim().toLowerCase(),
-      phone:         appData.phone,
-      category:      appData.category || 'General Food & Bakes',
-      address:       appData.address  || 'Campus Stall',
-      idPhotoUrl:    appData.idPhotoUrl ||
-                     'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
-      submittedAt:   new Date().toISOString(),
+      ownerName:       appData.ownerName.trim(),
+      storeName:       appData.storeName.trim(),
+      personalEmail:   cleanEmail,
+      phone:           appData.phone.trim(),
+      category:        appData.category || 'General',
+      address:         appData.address  || 'Campus',
+      idPhotoUrl:      appData.idPhotoUrl || '',
+      submittedAt:     new Date().toISOString(),
       isPhoneVerified: true,
-      status:        'pending',
+      status:          'pending',
     };
-    setPendingSellers((prev) => [newApp, ...prev]);
+    await saveSeller(newApp);
     return { success: true, application: newApp };
   };
 
-  // Admin approves — generates official @mondaymart.in seller account
-  const approveSeller = (requestId) => {
+  const approveSeller = async (requestId) => {
     const target = pendingSellers.find((r) => r.id === requestId);
     if (!target) return { success: false, error: 'Request not found' };
 
-    const sellerEmail  = generateSellerEmail(target.storeName);
+    let baseEmail = generateSellerEmail(target.storeName);
+    let sellerEmail = baseEmail;
+
+    // Ensure email is unique across existing users
+    let counter = 1;
+    while (users.some((u) => u.email?.toLowerCase() === sellerEmail.toLowerCase())) {
+      counter++;
+      const prefix = baseEmail.split('@')[0];
+      sellerEmail = `${prefix}${counter}@mondaymart.in`;
+    }
+
     const tempPassword = `seller${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newSellerUser = {
-      id:           `user-s-${Date.now()}`,
-      name:         target.ownerName,
-      email:        sellerEmail,
+      id:            `user-s-${Date.now()}`,
+      name:          target.ownerName,
+      email:         sellerEmail,
       personalEmail: target.personalEmail,
-      phone:        target.phone,
-      role:         'seller',
-      storeName:    target.storeName,
-      category:     target.category,
-      address:      target.address,
-      avatar:       `https://api.dicebear.com/7.x/identicon/svg?seed=${sellerEmail}`,
+      phone:         target.phone,
+      role:          'seller',
+      storeName:     target.storeName,
+      category:      target.category,
+      address:       target.address,
+      avatar:        `https://api.dicebear.com/7.x/identicon/svg?seed=${sellerEmail}`,
       tempPassword,
-      approvedAt:   new Date().toISOString(),
+      password:      tempPassword,
+      approvedAt:    new Date().toISOString(),
     };
 
-    setUsers((prev) => [...prev, newSellerUser]);
-    setPendingSellers((prev) =>
-      prev.map((s) =>
-        s.id === requestId
-          ? { ...s, status: 'approved', assignedEmail: sellerEmail, tempPassword }
-          : s
-      )
-    );
+    await saveUser(newSellerUser);
+    await saveSeller({
+      ...target,
+      status: 'approved',
+      assignedEmail: sellerEmail,
+      tempPassword,
+      approvedAt: new Date().toISOString(),
+    });
 
     return { success: true, sellerEmail, tempPassword, sellerUser: newSellerUser };
   };
 
-  const rejectSeller = (requestId, reason = 'Documentation incomplete') => {
-    setPendingSellers((prev) =>
-      prev.map((s) =>
-        s.id === requestId ? { ...s, status: 'rejected', rejectReason: reason } : s
-      )
-    );
+  const rejectSeller = async (requestId, reason = 'Documentation incomplete') => {
+    const target = pendingSellers.find((r) => r.id === requestId);
+    if (!target) return { success: false };
+    await saveSeller({ ...target, status: 'rejected', rejectReason: reason });
     return { success: true };
   };
 

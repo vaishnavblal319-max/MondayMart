@@ -114,6 +114,7 @@ export const SellerDashboard = () => {
 
         {/* Analytics Metric Cards */}
         <div
+          className="grid-4-mobile-2"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -280,7 +281,7 @@ export const SellerDashboard = () => {
               )}
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.25rem' }}>
               {displayedOrders.map((order) => (
                 <OrderTicket key={order.id} order={order} />
               ))}
@@ -289,7 +290,7 @@ export const SellerDashboard = () => {
         ) : (
           /* Inventory Management Tab */
           <div style={{ background: '#121217', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: 'var(--shadow-md)' }}>
-            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0d0d12' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0d0d12', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff' }}>Catalog & Stock Levels</h3>
                 <p style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Edit rates and available units in real-time</p>
@@ -300,7 +301,8 @@ export const SellerDashboard = () => {
               </button>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
+            {/* Desktop Table View */}
+            <div className="hide-mobile" style={{ overflowX: 'auto', width: '100%' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ background: '#181822', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#a1a1aa' }}>
@@ -430,6 +432,131 @@ export const SellerDashboard = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Cards View (Phones & Tablets) */}
+            <div className="show-mobile" style={{ flexDirection: 'column', gap: '0.85rem', padding: '1rem' }}>
+              {sellerProducts.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                  <p style={{ color: '#a1a1aa', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                    No menu items yet. Click below to add your first stall item.
+                  </p>
+                  <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary btn-sm" style={{ width: '100%' }}>
+                    <Plus size={15} />
+                    <span>Add Item</span>
+                  </button>
+                </div>
+              )}
+              {sellerProducts.map((p) => {
+                const isEditing = editingId === p.id;
+                const isLow = p.quantity <= 5 && p.quantity > 0;
+                const isOut = p.quantity === 0;
+
+                return (
+                  <div
+                    key={p.id}
+                    style={{
+                      background: '#181824',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '14px',
+                      padding: '1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        style={{ width: '50px', height: '50px', borderRadius: '10px', objectFit: 'cover' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '0.98rem' }}>{p.name}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                          <span className={p.isVeg ? 'badge badge-veg' : 'badge badge-non-veg'} style={{ fontSize: '0.62rem' }}>
+                            {p.isVeg ? 'VEG' : 'NON-VEG'}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>{p.category}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0f0f14', padding: '0.65rem 0.85rem', borderRadius: '10px' }}>
+                      <div>
+                        <div style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', fontWeight: 700 }}>Rate</div>
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={editPrice}
+                            onChange={(e) => setEditPrice(e.target.value)}
+                            style={{ width: '75px', padding: '4px 6px', borderRadius: '6px', border: '1.5px solid #ccff00', background: '#181824', color: '#fff' }}
+                          />
+                        ) : (
+                          <div style={{ fontWeight: 800, color: '#ccff00', fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
+                            {formatCurrency(p.price)}
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', fontWeight: 700 }}>Stock</div>
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={editQuantity}
+                            onChange={(e) => setEditQuantity(e.target.value)}
+                            style={{ width: '65px', padding: '4px 6px', borderRadius: '6px', border: '1.5px solid #ccff00', background: '#181824', color: '#fff' }}
+                          />
+                        ) : (
+                          <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '0.95rem' }}>
+                            {p.quantity} units
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        {isOut ? (
+                          <span className="badge" style={{ backgroundColor: 'rgba(255, 51, 85, 0.15)', color: '#ff3355', fontSize: '0.68rem' }}>Out of Stock</span>
+                        ) : isLow ? (
+                          <span className="badge badge-warning" style={{ fontSize: '0.68rem' }}>Low: {p.quantity}</span>
+                        ) : (
+                          <span className="badge badge-success" style={{ fontSize: '0.68rem' }}>In Stock</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', paddingTop: '0.25rem' }}>
+                      {isEditing ? (
+                        <button
+                          onClick={() => handleSaveEdit(p.id)}
+                          className="btn btn-primary btn-sm"
+                          style={{ flex: 1, justifyContent: 'center' }}
+                        >
+                          <Check size={14} />
+                          <span>Save Changes</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleStartEdit(p)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ flex: 1, justifyContent: 'center' }}
+                        >
+                          <Edit2 size={14} />
+                          <span>Edit Rate/Stock</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteProduct(p.id)}
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: '#ff3355', padding: '0.4rem 0.75rem' }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

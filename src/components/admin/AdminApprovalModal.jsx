@@ -22,29 +22,37 @@ export const AdminApprovalModal = ({ isOpen, onClose, onSwitchToSeller }) => {
   const [selectedIdPhoto, setSelectedIdPhoto] = useState(null);
   const [approvalResult, setApprovalResult] = useState(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPassword, setCopiedPassword] = useState(false);
 
   if (!isOpen) return null;
 
   const pendingList = pendingSellers.filter((s) => s.status === 'pending');
   const approvedList = pendingSellers.filter((s) => s.status === 'approved');
 
-  const handleApprove = (requestId) => {
-    const result = approveSeller(requestId);
+  const handleApprove = async (requestId) => {
+    const result = await approveSeller(requestId);
     if (result && result.success) {
       setApprovalResult(result);
     }
   };
 
-  const handleCopy = (text) => {
+  const handleCopy = (text, type = 'email') => {
     navigator.clipboard.writeText(text);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2000);
+    if (type === 'password') {
+      setCopiedPassword(true);
+      setTimeout(() => setCopiedPassword(false), 2000);
+    } else {
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2000);
+    }
   };
 
-  const handleDirectLogin = (email) => {
-    login(email);
-    onSwitchToSeller();
-    onClose();
+  const handleDirectLogin = async (email, password) => {
+    const result = await login(email, password);
+    if (result && result.success) {
+      onSwitchToSeller();
+      onClose();
+    }
   };
 
   return (
@@ -147,39 +155,69 @@ export const AdminApprovalModal = ({ isOpen, onClose, onSwitchToSeller }) => {
                 The official institutional stall email has been generated. The student seller can now log in:
               </p>
 
-              <div
-                style={{
-                  background: '#09090b',
-                  borderRadius: '12px',
-                  padding: '0.85rem 1rem',
-                  border: '1px solid rgba(204, 255, 0, 0.4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.5rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: '#a1a1aa', fontWeight: 600 }}>Assigned Seller Email:</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ccff00', fontFamily: 'var(--font-mono)' }}>
-                    {approvalResult.sellerEmail}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div
+                  style={{
+                    background: '#09090b',
+                    borderRadius: '12px',
+                    padding: '0.85rem 1rem',
+                    border: '1px solid rgba(204, 255, 0, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: '#a1a1aa', fontWeight: 600 }}>Assigned Seller Email:</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ccff00', fontFamily: 'var(--font-mono)' }}>
+                      {approvalResult.sellerEmail}
+                    </div>
                   </div>
+
+                  <button
+                    onClick={() => handleCopy(approvalResult.sellerEmail, 'email')}
+                    className="btn btn-secondary btn-sm"
+                    style={{ gap: '0.35rem' }}
+                  >
+                    {copiedEmail ? <Check size={14} color="#ccff00" /> : <Copy size={14} />}
+                    <span>{copiedEmail ? 'Copied' : 'Copy'}</span>
+                  </button>
                 </div>
 
-                <button
-                  onClick={() => handleCopy(approvalResult.sellerEmail)}
-                  className="btn btn-secondary btn-sm"
-                  style={{ gap: '0.35rem' }}
+                <div
+                  style={{
+                    background: '#09090b',
+                    borderRadius: '12px',
+                    padding: '0.85rem 1rem',
+                    border: '1px solid rgba(204, 255, 0, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.5rem',
+                  }}
                 >
-                  {copiedEmail ? <Check size={14} color="#ccff00" /> : <Copy size={14} />}
-                  <span>{copiedEmail ? 'Copied!' : 'Copy'}</span>
-                </button>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: '#a1a1aa', fontWeight: 600 }}>Assigned Password:</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-mono)' }}>
+                      {approvalResult.tempPassword}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleCopy(approvalResult.tempPassword, 'password')}
+                    className="btn btn-secondary btn-sm"
+                    style={{ gap: '0.35rem' }}
+                  >
+                    {copiedPassword ? <Check size={14} color="#ccff00" /> : <Copy size={14} />}
+                    <span>{copiedPassword ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <button
-                  onClick={() => handleDirectLogin(approvalResult.sellerEmail)}
+                  onClick={() => handleDirectLogin(approvalResult.sellerEmail, approvalResult.tempPassword)}
                   className="btn btn-primary btn-sm"
                   style={{ gap: '0.45rem' }}
                 >
@@ -348,12 +386,15 @@ export const AdminApprovalModal = ({ isOpen, onClose, onSwitchToSeller }) => {
                       <span className="badge badge-success">✓ Active Stall</span>
                     </div>
                     <div style={{ fontSize: '0.82rem', color: '#a1a1aa', marginTop: '0.2rem' }}>
-                      Lead: {seller.ownerName} • Official: <strong style={{ color: '#ccff00' }}>{seller.assignedEmail}</strong>
+                      Lead: {seller.ownerName} • Email: <strong style={{ color: '#ccff00' }}>{seller.assignedEmail}</strong>
+                      {seller.tempPassword && (
+                        <span> • Pass: <strong style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>{seller.tempPassword}</strong></span>
+                      )}
                     </div>
                   </div>
 
                   <button
-                    onClick={() => handleDirectLogin(seller.assignedEmail)}
+                    onClick={() => handleDirectLogin(seller.assignedEmail, seller.tempPassword)}
                     className="btn btn-secondary btn-sm"
                     style={{ gap: '0.4rem' }}
                   >

@@ -119,30 +119,26 @@ export const OtpVerificationModal = ({
               We've sent a 6-digit verification code to:
             </p>
             <div style={{ fontWeight: 800, fontSize: '1.15rem', color: '#ffffff', marginBottom: '1.25rem', fontFamily: 'var(--font-mono)' }}>
-              {sellerData?.phone || '+91 98123 45678'}
+              {sellerData?.phone}
             </div>
 
-            {/* Demo Helper Pill */}
+            {/* Verification Code Display — replace with real SMS gateway in production */}
             <div
-              onClick={handleAutoFill}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
                 backgroundColor: '#181824',
-                border: '1px dashed rgba(204, 255, 0, 0.45)',
+                border: '1px solid rgba(204, 255, 0, 0.45)',
                 borderRadius: '8px',
-                padding: '0.45rem 0.95rem',
-                fontSize: '0.8rem',
+                padding: '0.65rem 1.25rem',
+                fontSize: '0.85rem',
                 color: '#ffffff',
-                cursor: 'pointer',
                 marginBottom: '1.75rem',
-                boxShadow: '0 0 10px rgba(204, 255, 0, 0.1)',
               }}
-              title="Click to automatically fill code"
             >
-              <span>Demo OTP: <strong style={{ color: '#ccff00', fontFamily: 'var(--font-mono)' }}>{demoCode}</strong></span>
-              <span style={{ color: '#ccff00', fontWeight: 700 }}>[Click to Auto-fill]</span>
+              <span style={{ color: '#a1a1aa' }}>Your verification code:</span>
+              <strong style={{ color: '#ccff00', fontFamily: 'var(--font-mono)', fontSize: '1.1rem', letterSpacing: '0.15em' }}>{demoCode}</strong>
             </div>
 
             {error && (
@@ -152,7 +148,7 @@ export const OtpVerificationModal = ({
             )}
 
             {/* 6 Digit Inputs */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.65rem', marginBottom: '1.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(4px, 1.8vw, 10px)', marginBottom: '1.75rem' }}>
               {otp.map((digit, idx) => (
                 <input
                   key={idx}
@@ -164,9 +160,6 @@ export const OtpVerificationModal = ({
                   onKeyDown={(e) => handleKeyDown(idx, e)}
                   className="pin-digit-box"
                   style={{
-                    width: '46px',
-                    height: '54px',
-                    fontSize: '1.5rem',
                     textAlign: 'center',
                     border: digit ? '2px solid #ccff00' : '2px solid rgba(255, 255, 255, 0.15)',
                     backgroundColor: digit ? '#09090b' : '#181824',

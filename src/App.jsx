@@ -9,6 +9,7 @@ import { CustomerRegisterModal } from './components/landing/CustomerRegisterModa
 import { SellerRegisterModal } from './components/seller-onboarding/SellerRegisterModal';
 import { OtpVerificationModal } from './components/seller-onboarding/OtpVerificationModal';
 import { AdminApprovalModal } from './components/admin/AdminApprovalModal';
+import { AdminApprovalPage } from './components/admin/AdminApprovalPage';
 import { CustomerDashboard } from './components/customer/CustomerDashboard';
 import { CartDrawer } from './components/customer/CartDrawer';
 import { OrderSuccessModal } from './components/customer/OrderSuccessModal';
@@ -19,12 +20,13 @@ import { FirebaseSetupModal } from './components/common/FirebaseSetupModal';
 const MainApp = () => {
   const { currentUser } = useAuth();
 
-  // Navigation view: 'landing' | 'customer' | 'seller'
+  // Navigation view: 'landing' | 'customer' | 'seller' | 'admin'
   const [currentView, setCurrentView] = useState(() => {
     try {
       const saved = localStorage.getItem('mm_current_user');
       if (saved) {
         const user = JSON.parse(saved);
+        if (user?.role === 'admin') return 'admin';
         if (user?.role === 'seller') return 'seller';
         if (user?.role === 'customer') return 'customer';
       }
@@ -66,8 +68,8 @@ const MainApp = () => {
         setCurrentView('customer');
         showToast(`Welcome, ${currentUser.name}! Happy ordering.`);
       } else if (currentUser.role === 'admin') {
-        setIsAdminApprovalOpen(true);
-        showToast('Admin Console loaded.');
+        setCurrentView('admin');
+        showToast('IEDC Venture Approval Console loaded.');
       }
     }
     if (!currentUser) {
@@ -93,10 +95,10 @@ const MainApp = () => {
   };
 
   const handleLoginSuccess = (role) => {
-    if (role === 'seller') {
+    if (role === 'admin') {
+      setCurrentView('admin');
+    } else if (role === 'seller') {
       setCurrentView('seller');
-    } else if (role === 'admin') {
-      setIsAdminApprovalOpen(true);
     } else {
       setCurrentView('customer');
     }
@@ -118,7 +120,7 @@ const MainApp = () => {
         onOpenLogin={() => setIsLoginOpen(true)}
         onOpenCustomerRegister={() => setIsCustomerRegisterOpen(true)}
         onOpenSellerRegister={() => setIsSellerRegisterOpen(true)}
-        onOpenAdminApproval={() => setIsAdminApprovalOpen(true)}
+        onOpenAdminApproval={() => setCurrentView('admin')}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenOrders={() => setIsOrdersOpen(true)}
         onOpenFirebaseSetup={() => setIsFirebaseSetupOpen(true)}
@@ -143,6 +145,13 @@ const MainApp = () => {
         )}
 
         {currentView === 'seller' && <SellerDashboard />}
+
+        {currentView === 'admin' && (
+          <AdminApprovalPage
+            onSwitchToSeller={() => setCurrentView('seller')}
+            onSwitchToCustomer={() => setCurrentView('customer')}
+          />
+        )}
       </main>
 
       {/* Modals & Drawers */}

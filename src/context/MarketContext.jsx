@@ -1,47 +1,53 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { generateOrderId, generateRandomPin } from '../utils/helpers';
+import {
+  db,
+  productsCol,
+  ordersCol,
+  doc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  query,
+  orderBy,
+} from '../firebase';
 
 const MarketContext = createContext();
 
-// Data version — bump this whenever the seed data changes so old
-// localStorage is automatically wiped and reseeded.
-const DATA_VERSION = 'v4-clean';
-
-function loadFromStorage(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function initStorage() {
-  const storedVersion = localStorage.getItem('mm_data_version');
-  if (storedVersion !== DATA_VERSION) {
-    // Wipe every key so stale dummy data is removed
-    ['mm_products', 'mm_orders', 'mm_cart'].forEach((k) =>
-      localStorage.removeItem(k)
-    );
-    localStorage.setItem('mm_data_version', DATA_VERSION);
-  }
-}
-
 export const MarketProvider = ({ children }) => {
-  // Wipe stale data on first mount
-  React.useMemo(() => initStorage(), []);
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders]     = useState([]);
+  const [cart, setCart]         = useState(() => {
+    try {
+      const raw = localStorage.getItem('mm_cart');
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  });
 
-  const [products, setProducts] = useState(() => loadFromStorage('mm_products', []));
-  const [orders, setOrders]     = useState(() => loadFromStorage('mm_orders', []));
-  const [cart, setCart]         = useState(() => loadFromStorage('mm_cart', {}));
+  // ─── Real-time Firestore listeners ───────────────────────────────────────────
+  useEffect(() => {
+    const unsubProducts = onSnapshot(
+      query(productsCol(), orderBy('createdAt', 'desc')),
+      (snap) => setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (err) => console.warn('Products listener:', err)
+    );
 
-  // Persist to localStorage whenever state changes
-  useEffect(() => { localStorage.setItem('mm_products', JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem('mm_orders',   JSON.stringify(orders));   }, [orders]);
-  useEffect(() => { localStorage.setItem('mm_cart',     JSON.stringify(cart));     }, [cart]);
+    const unsubOrders = onSnapshot(
+      query(ordersCol(), orderBy('createdAt', 'desc')),
+      (snap) => setOrders(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (err) => console.warn('Orders listener:', err)
+    );
 
-  // ─── Cart ─────────────────────────────────────────────────────────────────
+    return () => { unsubProducts(); unsubOrders(); };
+  }, []);
 
+  // ─── Cart stays client-side only ─────────────────────────────────────────────
+  useEffect(() => {
+    localStorage.setItem('mm_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  // ─── Cart ─────────────────────────────────────────────────────────────────────
   const addToCart = (productId) => {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
@@ -66,47 +72,41 @@ export const MarketProvider = ({ children }) => {
 
   const clearCart = () => setCart({});
 
-  // ─── Products (Seller) ────────────────────────────────────────────────────
-
-  const addProduct = (productData) => {
+  // ─── Products ─────────────────────────────────────────────────────────────────
+  const addProduct = async (productData) => {
     const id = `prod-${Date.now()}`;
     const newProduct = {
       id,
       name:        productData.name.trim(),
       category:    productData.category || 'Meals',
-      price:       Number(productData.price) || 99,
-      quantity:    Number(productData.quantity) || 10,
-      description: productData.description?.trim() || 'Freshly prepared.',
+      price:       Number(productData.price) || 0,
+      quantity:    Number(productData.quantity) || 0,
+      description: productData.description?.trim() || '',
       isVeg:       Boolean(productData.isVeg),
-      rating:      4.8,
-      image:       productData.image ||
-                   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
-      sellerStore: productData.sellerStore || 'Campus Stall',
+      rating:      0,
+      image:       productData.image || '',
+      sellerStore: productData.sellerStore || '',
       sellerEmail: productData.sellerEmail || '',
       createdAt:   new Date().toISOString(),
     };
-    setProducts((prev) => [newProduct, ...prev]);
+    try { await setDoc(doc(db, 'products', id), newProduct); }
+    catch (err) { console.warn('addProduct:', err); }
     return newProduct;
   };
 
-  const updateProduct = (id, updates) => {
-    setProducts((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
-    );
+  const updateProduct = async (id, updates) => {
+    try { await updateDoc(doc(db, 'products', id), updates); }
+    catch (err) { console.warn('updateProduct:', err); }
   };
 
-  const deleteProduct = (id) => {
-    setProducts((prev) => prev.filter((item) => item.id !== id));
-    setCart((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
+  const deleteProduct = async (id) => {
+    setCart((prev) => { const n = { ...prev }; delete n[id]; return n; });
+    try { await deleteDoc(doc(db, 'products', id)); }
+    catch (err) { console.warn('deleteProduct:', err); }
   };
 
-  // ─── Orders ───────────────────────────────────────────────────────────────
-
-  const placeOrder = ({ customer, deliveryAddress, notes = '' }) => {
+  // ─── Orders ───────────────────────────────────────────────────────────────────
+  const placeOrder = async ({ customer, deliveryAddress, notes = '' }) => {
     const orderItems = Object.entries(cart)
       .map(([productId, quantity]) => {
         const product = products.find((p) => p.id === productId);
@@ -121,17 +121,16 @@ export const MarketProvider = ({ children }) => {
     const deliveryFee  = subtotal > 499 ? 0 : 35;
     const packagingFee = 15;
     const totalAmount  = subtotal + taxes + deliveryFee + packagingFee;
-
-    const orderId = generateOrderId();
-    const pin     = generateRandomPin();
+    const orderId      = generateOrderId();
+    const pin          = generateRandomPin();
 
     const newOrder = {
       id: orderId,
       customer: {
         id:    customer?.id    || 'guest',
         name:  customer?.name  || 'Customer',
-        email: customer?.email || 'guest@mondaymart.in',
-        phone: customer?.phone || '+91 98765 43210',
+        email: customer?.email || '',
+        phone: customer?.phone || '',
       },
       items: orderItems,
       subtotal,
@@ -141,7 +140,7 @@ export const MarketProvider = ({ children }) => {
       totalAmount,
       pin,
       status: 'pending',
-      deliveryAddress: deliveryAddress || 'Counter Pickup (Order Pass)',
+      deliveryAddress: deliveryAddress || 'Counter Pickup',
       notes,
       createdAt: new Date().toISOString(),
       qrPayload: JSON.stringify({
@@ -153,41 +152,44 @@ export const MarketProvider = ({ children }) => {
       }),
     };
 
-    // Deduct stock
-    setProducts((prev) =>
-      prev.map((p) => {
-        const ordered = cart[p.id];
-        return ordered ? { ...p, quantity: Math.max(0, p.quantity - ordered) } : p;
-      })
-    );
-    setOrders((prev) => [newOrder, ...prev]);
     clearCart();
+
+    // Write order to Firestore
+    try { await setDoc(doc(db, 'orders', orderId), newOrder); }
+    catch (err) { console.warn('placeOrder:', err); }
+
+    // Deduct stock in Firestore
+    for (const item of orderItems) {
+      const prod = products.find((p) => p.id === item.product.id);
+      if (prod) {
+        try {
+          await updateDoc(doc(db, 'products', item.product.id), {
+            quantity: Math.max(0, prod.quantity - item.quantity),
+          });
+        } catch (err) { console.warn('stockDeduct:', err); }
+      }
+    }
 
     return newOrder;
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === orderId
-          ? { ...o, status: newStatus, updatedAt: new Date().toISOString() }
-          : o
-      )
-    );
+  const updateOrderStatus = async (orderId, newStatus) => {
+    const updatedAt = new Date().toISOString();
+    try { await updateDoc(doc(db, 'orders', orderId), { status: newStatus, updatedAt }); }
+    catch (err) { console.warn('updateOrderStatus:', err); }
   };
 
-  const verifyOrderPin = (orderId, enteredPin) => {
+  const verifyOrderPin = async (orderId, enteredPin) => {
     const order = orders.find((o) => o.id === orderId);
     if (!order) return { success: false, error: 'Order not found' };
     if (String(order.pin).trim() !== String(enteredPin).trim())
       return { success: false, error: 'Incorrect PIN! Ask the customer to recheck.' };
 
-    const completedTime = new Date().toISOString();
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === orderId ? { ...o, status: 'completed', verifiedAt: completedTime } : o
-      )
-    );
+    const verifiedAt = new Date().toISOString();
+    try {
+      await updateDoc(doc(db, 'orders', orderId), { status: 'completed', verifiedAt });
+    } catch (err) { console.warn('verifyOrderPin:', err); }
+
     return { success: true };
   };
 
