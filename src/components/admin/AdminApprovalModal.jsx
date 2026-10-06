@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   X,
   ShieldCheck,
@@ -13,17 +14,35 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import { formatDateTime } from '../../utils/helpers';
 
 export const AdminApprovalModal = ({ isOpen, onClose, onSwitchToSeller }) => {
-  const { pendingSellers, approveSeller, rejectSeller, login } = useAuth();
+  const { pendingSellers, approveSeller, rejectSeller, login, currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved'
   const [selectedIdPhoto, setSelectedIdPhoto] = useState(null);
   const [approvalResult, setApprovalResult] = useState(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   if (!isOpen) return null;
+
+  // ── Admin-only guard — must come after hooks, before rendering console ────
+  if (!currentUser || currentUser.role !== 'admin') {
+    return (
+      <div className="modal-backdrop" onClick={onClose}>
+        <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(255, 51, 85, 0.15)', color: '#ff3355', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', border: '2px solid rgba(255, 51, 85, 0.4)' }}>
+            <ShieldCheck size={32} />
+          </div>
+          <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.5rem', fontFamily: 'var(--font-heading)' }}>Admin Access Only</h3>
+          <p style={{ color: '#a1a1aa', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+            The IEDC Approval Console is restricted to administrators.<br />
+            Please log in with your admin credentials.
+          </p>
+          <button onClick={onClose} className="btn btn-primary" style={{ minWidth: '120px' }}>Close</button>
+        </div>
+      </div>
+    );
+  }
 
   const pendingList = pendingSellers.filter((s) => s.status === 'pending');
   const approvedList = pendingSellers.filter((s) => s.status === 'approved');

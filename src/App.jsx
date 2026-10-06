@@ -84,7 +84,16 @@ const MainApp = () => {
   };
 
   const handleApplicationSubmitted = () => {
-    showToast('Phone verified! Seller application sent to Admin queue.', 'success');
+    showToast('Email verified! Seller application sent to Admin queue.', 'success');
+  };
+
+  // Only allow admins to open the approval console
+  const handleOpenAdminApproval = () => {
+    if (currentUser?.role === 'admin') {
+      setIsAdminApprovalOpen(true);
+    } else {
+      showToast('Admin access only. Please log in as admin.', 'error');
+    }
   };
 
   const handleOrderPlaced = (order) => {
@@ -118,7 +127,7 @@ const MainApp = () => {
         onOpenLogin={() => setIsLoginOpen(true)}
         onOpenCustomerRegister={() => setIsCustomerRegisterOpen(true)}
         onOpenSellerRegister={() => setIsSellerRegisterOpen(true)}
-        onOpenAdminApproval={() => setIsAdminApprovalOpen(true)}
+        onOpenAdminApproval={handleOpenAdminApproval}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenOrders={() => setIsOrdersOpen(true)}
         onOpenFirebaseSetup={() => setIsFirebaseSetupOpen(true)}
@@ -175,7 +184,6 @@ const MainApp = () => {
         onClose={() => setIsOtpOpen(false)}
         sellerData={sellerRegData}
         onApplicationSubmitted={handleApplicationSubmitted}
-        onOpenAdminApproval={() => setIsAdminApprovalOpen(true)}
       />
 
       <AdminApprovalModal
