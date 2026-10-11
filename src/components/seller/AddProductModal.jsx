@@ -47,7 +47,7 @@ export const AddProductModal = ({ isOpen, onClose }) => {
       <div className="modal-container modal-lg" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.3)' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.3)' }}>
               <Package size={18} />
             </div>
             <div>
@@ -197,8 +197,8 @@ export const AddProductModal = ({ isOpen, onClose }) => {
                   style={{
                     borderRadius: '10px',
                     overflow: 'hidden',
-                    border: formData.image === img.url ? '3px solid #ccff00' : '2px solid rgba(255, 255, 255, 0.1)',
-                    boxShadow: formData.image === img.url ? '0 0 12px rgba(204, 255, 0, 0.5)' : 'none',
+                    border: formData.image === img.url ? '3px solid #fff200' : '2px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: formData.image === img.url ? '0 0 12px rgba(255, 242, 0, 0.5)' : 'none',
                     cursor: 'pointer',
                     width: '64px',
                     height: '64px',

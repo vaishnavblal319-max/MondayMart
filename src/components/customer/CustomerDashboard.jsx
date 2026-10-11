@@ -61,8 +61,8 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
           <div
             onClick={onOpenOrders}
             style={{
-              background: 'linear-gradient(135deg, rgba(204, 255, 0, 0.1) 0%, #121218 100%)',
-              border: '1.5px solid rgba(204, 255, 0, 0.45)',
+              background: 'linear-gradient(135deg, rgba(255, 242, 0, 0.1) 0%, #121218 100%)',
+              border: '1.5px solid rgba(255, 242, 0, 0.45)',
               borderRadius: '16px',
               padding: '1.1rem 1.4rem',
               marginBottom: '2rem',
@@ -70,15 +70,15 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(204, 255, 0, 0.15)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 242, 0, 0.15)',
               transition: 'var(--transition)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#ccff00';
+              e.currentTarget.style.borderColor = '#fff200';
               e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(204, 255, 0, 0.45)';
+              e.currentTarget.style.borderColor = 'rgba(255, 242, 0, 0.45)';
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
@@ -89,12 +89,12 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
                   height: '44px',
                   borderRadius: '12px',
                   backgroundColor: '#000000',
-                  border: '1.5px solid #ccff00',
-                  color: '#ccff00',
+                  border: '1.5px solid #fff200',
+                  color: '#fff200',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 0 12px rgba(204, 255, 0, 0.3)',
+                  boxShadow: '0 0 12px rgba(255, 242, 0, 0.3)',
                 }}
               >
                 <QrCode size={22} />
@@ -104,12 +104,12 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
                   You have {activeOrders.length} active campus pickup order! (Order #{activeOrders[0].id})
                 </div>
                 <div style={{ fontSize: '0.82rem', color: '#a1a1aa', fontWeight: 600, marginTop: '0.15rem' }}>
-                  Pickup PIN: <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', fontWeight: 800, color: '#ccff00', background: '#000000', padding: '1px 7px', borderRadius: '4px', border: '1px solid #ccff00' }}>{activeOrders[0].pin}</span> • Tap to open QR pass
+                  Pickup PIN: <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', fontWeight: 800, color: '#fff200', background: '#000000', padding: '1px 7px', borderRadius: '4px', border: '1px solid #fff200' }}>{activeOrders[0].pin}</span> • Tap to open QR pass
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ccff00', fontWeight: 700, fontSize: '0.9rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff200', fontWeight: 700, fontSize: '0.9rem' }}>
               <span>Show QR Pass</span>
               <ArrowRight size={16} />
             </div>
@@ -199,15 +199,15 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
                   style={{
                     padding: '0.5rem 1.2rem',
                     borderRadius: '9999px',
-                    border: isActive ? '1.5px solid #ccff00' : '1.5px solid rgba(255, 255, 255, 0.12)',
-                    backgroundColor: isActive ? '#ccff00' : '#14141b',
+                    border: isActive ? '1.5px solid #fff200' : '1.5px solid rgba(255, 255, 255, 0.12)',
+                    backgroundColor: isActive ? '#fff200' : '#14141b',
                     color: isActive ? '#000000' : '#a1a1aa',
                     fontSize: '0.85rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     transition: 'var(--transition)',
-                    boxShadow: isActive ? '0 0 15px rgba(204, 255, 0, 0.4)' : 'none',
+                    boxShadow: isActive ? '0 0 15px rgba(255, 242, 0, 0.4)' : 'none',
                     fontFamily: 'var(--font-heading)',
                   }}
                 >
@@ -276,9 +276,9 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 15px 40px rgba(0, 0, 0, 0.95), 0 0 25px rgba(204, 255, 0, 0.35)',
+              boxShadow: '0 15px 40px rgba(0, 0, 0, 0.95), 0 0 25px rgba(255, 242, 0, 0.35)',
               cursor: 'pointer',
-              border: '1.5px solid #ccff00',
+              border: '1.5px solid #fff200',
               transition: 'var(--transition)',
             }}
             onMouseEnter={(e) => {
@@ -291,7 +291,7 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
               <div
                 style={{
-                  backgroundColor: '#ccff00',
+                  backgroundColor: '#fff200',
                   color: '#000000',
                   width: '32px',
                   height: '32px',
@@ -310,12 +310,12 @@ export const CustomerDashboard = ({ onOpenCart, onOpenOrders }) => {
                   {cartItemCount} {cartItemCount === 1 ? 'item' : 'items'} in cart
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>
-                  Total: <strong style={{ color: '#ccff00' }}>{formatCurrency(cartSubtotal)}</strong>
+                  Total: <strong style={{ color: '#fff200' }}>{formatCurrency(cartSubtotal)}</strong>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ccff00', fontWeight: 800, fontSize: '0.9rem', fontFamily: 'var(--font-heading)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff200', fontWeight: 800, fontSize: '0.9rem', fontFamily: 'var(--font-heading)' }}>
               <span>View Cart & QR Pass</span>
               <ArrowRight size={18} />
             </div>

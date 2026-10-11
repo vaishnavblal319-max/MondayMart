@@ -63,6 +63,12 @@ export const AuthProvider = ({ children }) => {
         (u) => u.email.toLowerCase() === cleanEmail && u.role === 'seller'
       );
       if (seller) {
+        if (seller.tempPassword && password && password.trim() !== seller.tempPassword) {
+          return {
+            success: false,
+            error: 'Incorrect password. Please use the password issued upon approval.',
+          };
+        }
         setCurrentUser(seller);
         return { success: true, user: seller, role: 'seller' };
       }
@@ -75,11 +81,17 @@ export const AuthProvider = ({ children }) => {
     // Customer — existing account
     const existing = users.find((u) => u.email.toLowerCase() === cleanEmail);
     if (existing) {
+      if (existing.password && password && password.trim() !== existing.password) {
+        return {
+          success: false,
+          error: 'Incorrect password for this account.',
+        };
+      }
       setCurrentUser(existing);
       return { success: true, user: existing, role: existing.role };
     }
 
-    // Customer — auto-register on first login (email-only, no password required for demo)
+    // Customer — auto-register on first login
     const namePart     = cleanEmail.split('@')[0];
     const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
     const newCustomer  = {
@@ -126,13 +138,13 @@ export const AuthProvider = ({ children }) => {
     const id = `req-${Date.now()}`;
     const newApp = {
       id,
-      ownerName:     appData.ownerName,
-      storeName:     appData.storeName,
-      personalEmail: appData.personalEmail.trim().toLowerCase(),
-      phone:         appData.phone,
-      category:      appData.category || 'General Food & Bakes',
-      address:       appData.address  || 'Campus Stall',
-      idPhotoUrl:    appData.idPhotoUrl ||
+      ownerName:     appData?.ownerName || 'Student Founder',
+      storeName:     appData?.storeName || 'Stall Venture',
+      personalEmail: (appData?.personalEmail || appData?.email || '').trim().toLowerCase(),
+      phone:         appData?.phone || '',
+      category:      appData?.category || 'General Food & Bakes',
+      address:       appData?.address  || 'Campus Stall',
+      idPhotoUrl:    appData?.idPhotoUrl ||
                      'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
       submittedAt:   new Date().toISOString(),
       isPhoneVerified: true,

@@ -15,7 +15,7 @@ export const QRCodeDisplay = ({ value, pin, size = 180, showPinPill = true }) =>
 
   return (
     <div className="qr-pass-card">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.85rem', color: '#ccff00', fontWeight: 800, fontSize: '0.9rem', letterSpacing: '0.05em', fontFamily: 'var(--font-heading)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.85rem', color: '#fff200', fontWeight: 800, fontSize: '0.9rem', letterSpacing: '0.05em', fontFamily: 'var(--font-heading)' }}>
         <QrCode size={18} />
         <span>IEDC STALL VERIFICATION PASS</span>
       </div>
@@ -26,8 +26,8 @@ export const QRCodeDisplay = ({ value, pin, size = 180, showPinPill = true }) =>
           padding: '1rem',
           borderRadius: '16px',
           display: 'inline-block',
-          boxShadow: '0 0 25px rgba(204, 255, 0, 0.25)',
-          border: '2px solid #ccff00',
+          boxShadow: '0 0 25px rgba(255, 242, 0, 0.25)',
+          border: '2px solid #fff200',
         }}
       >
         <QRCodeSVG
@@ -36,7 +36,7 @@ export const QRCodeDisplay = ({ value, pin, size = 180, showPinPill = true }) =>
           level="H"
           includeMargin={false}
           imageSettings={{
-            src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="%23000000"/><text x="50" y="66" font-size="44" font-family="Arial" font-weight="900" fill="%23ccff00" text-anchor="middle">M</text></svg>',
+            src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="%23000000"/><text x="50" y="66" font-size="44" font-family="Arial" font-weight="900" fill="%23fff200" text-anchor="middle">M</text></svg>',
             x: undefined,
             y: undefined,
             height: 32,
@@ -58,14 +58,14 @@ export const QRCodeDisplay = ({ value, pin, size = 180, showPinPill = true }) =>
               title="Copy PIN"
               style={{
                 background: '#181824',
-                border: '1px solid rgba(204, 255, 0, 0.4)',
+                border: '1px solid rgba(255, 242, 0, 0.4)',
                 borderRadius: '10px',
                 padding: '0.65rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ccff00',
+                color: '#fff200',
                 transition: 'var(--transition)',
               }}
             >

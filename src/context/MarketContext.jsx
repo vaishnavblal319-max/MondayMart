@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { generateOrderId, generateRandomPin } from '../utils/helpers';
+import { initialProducts } from '../data/initialProducts';
+import { initialBanners } from '../data/initialBanners';
 
 const MarketContext = createContext();
 
 // Data version — bump this whenever the seed data changes so old
 // localStorage is automatically wiped and reseeded.
-const DATA_VERSION = 'v4-clean';
+const DATA_VERSION = 'v6-fff200-announcement-posters';
 
 function loadFromStorage(key, fallback) {
   try {
@@ -20,7 +22,7 @@ function initStorage() {
   const storedVersion = localStorage.getItem('mm_data_version');
   if (storedVersion !== DATA_VERSION) {
     // Wipe every key so stale dummy data is removed
-    ['mm_products', 'mm_orders', 'mm_cart'].forEach((k) =>
+    ['mm_products', 'mm_orders', 'mm_cart', 'mm_banners'].forEach((k) =>
       localStorage.removeItem(k)
     );
     localStorage.setItem('mm_data_version', DATA_VERSION);
@@ -31,14 +33,43 @@ export const MarketProvider = ({ children }) => {
   // Wipe stale data on first mount
   React.useMemo(() => initStorage(), []);
 
-  const [products, setProducts] = useState(() => loadFromStorage('mm_products', []));
+  const [products, setProducts] = useState(() => loadFromStorage('mm_products', initialProducts));
+  const [banners, setBanners]   = useState(() => loadFromStorage('mm_banners', initialBanners));
   const [orders, setOrders]     = useState(() => loadFromStorage('mm_orders', []));
   const [cart, setCart]         = useState(() => loadFromStorage('mm_cart', {}));
 
   // Persist to localStorage whenever state changes
   useEffect(() => { localStorage.setItem('mm_products', JSON.stringify(products)); }, [products]);
+  useEffect(() => { localStorage.setItem('mm_banners',  JSON.stringify(banners));  }, [banners]);
   useEffect(() => { localStorage.setItem('mm_orders',   JSON.stringify(orders));   }, [orders]);
   useEffect(() => { localStorage.setItem('mm_cart',     JSON.stringify(cart));     }, [cart]);
+
+  // ─── Banners (Admin Managed) ─────────────────────────────────────────────
+
+  const addBanner = (bannerData) => {
+    const id = `banner-${Date.now()}`;
+    const newBanner = {
+      id,
+      title: bannerData.title?.trim() || 'Campus Notice',
+      tagline: bannerData.tagline?.trim() || '',
+      badge: bannerData.badge?.trim() || '📢 ANNOUNCEMENT',
+      imageUrl: bannerData.imageUrl?.trim() || '',
+      accentColor: '#fff200',
+      createdAt: new Date().toISOString(),
+    };
+    setBanners((prev) => [newBanner, ...prev]);
+    return newBanner;
+  };
+
+  const deleteBanner = (bannerId) => {
+    setBanners((prev) => prev.filter((b) => b.id !== bannerId));
+  };
+
+  const updateBanner = (bannerId, updates) => {
+    setBanners((prev) =>
+      prev.map((b) => (b.id === bannerId ? { ...b, ...updates } : b))
+    );
+  };
 
   // ─── Cart ─────────────────────────────────────────────────────────────────
 
@@ -195,6 +226,7 @@ export const MarketProvider = ({ children }) => {
     <MarketContext.Provider
       value={{
         products,
+        banners,
         orders,
         cart,
         addToCart,
@@ -203,6 +235,9 @@ export const MarketProvider = ({ children }) => {
         addProduct,
         updateProduct,
         deleteProduct,
+        addBanner,
+        deleteBanner,
+        updateBanner,
         placeOrder,
         updateOrderStatus,
         verifyOrderPin,

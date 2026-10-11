@@ -22,7 +22,7 @@ export const Navbar = ({
   onOpenCart,
   onOpenOrders,
   onOpenFirebaseSetup,
-  currentView: _currentView,
+  currentView,
   setCurrentView,
 }) => {
   const { currentUser, logout, login, registerCustomer, pendingSellers } = useAuth();
@@ -81,14 +81,14 @@ export const Navbar = ({
               height: '44px',
               borderRadius: '12px',
               background: '#000000',
-              border: '2px solid #ccff00',
+              border: '2px solid #fff200',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ccff00',
+              color: '#fff200',
               fontWeight: 800,
               fontSize: '1.3rem',
-              boxShadow: '0 0 18px rgba(204, 255, 0, 0.35)',
+              boxShadow: '0 0 18px rgba(255, 242, 0, 0.35)',
             }}
           >
             M⚡
@@ -96,13 +96,13 @@ export const Navbar = ({
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               <span style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
-                Monday<span style={{ color: '#ccff00', textShadow: '0 0 10px rgba(204, 255, 0, 0.4)' }}>Market</span>
+                Monday<span style={{ color: '#fff200', textShadow: '0 0 10px rgba(255, 242, 0, 0.4)' }}>Market</span>
               </span>
               <span
                 style={{
-                  background: 'rgba(204, 255, 0, 0.15)',
-                  color: '#ccff00',
-                  border: '1px solid rgba(204, 255, 0, 0.4)',
+                  background: 'rgba(255, 242, 0, 0.15)',
+                  color: '#fff200',
+                  border: '1px solid rgba(255, 242, 0, 0.4)',
                   fontSize: '0.65rem',
                   fontWeight: 800,
                   padding: '2px 7px',
@@ -157,13 +157,13 @@ export const Navbar = ({
               className="btn btn-secondary btn-sm"
               style={{
                 borderRadius: '9999px',
-                borderColor: 'rgba(204, 255, 0, 0.3)',
-                backgroundColor: 'rgba(204, 255, 0, 0.08)',
-                color: '#ccff00',
+                borderColor: 'rgba(255, 242, 0, 0.3)',
+                backgroundColor: 'rgba(255, 242, 0, 0.08)',
+                color: '#fff200',
                 gap: '0.35rem',
               }}
             >
-              <Sparkles size={14} color="#ccff00" />
+              <Sparkles size={14} color="#fff200" />
               <span>Demo Personas</span>
               <ChevronDown size={14} />
             </button>
@@ -177,7 +177,7 @@ export const Navbar = ({
                   background: '#121218',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '16px',
-                  boxShadow: '0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(204, 255, 0, 0.1)',
+                  boxShadow: '0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255, 242, 0, 0.1)',
                   padding: '0.5rem',
                   minWidth: '250px',
                   zIndex: 1001,
@@ -209,7 +209,7 @@ export const Navbar = ({
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
                 >
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200' }}>
                     <User size={15} />
                   </div>
                   <div>
@@ -237,7 +237,7 @@ export const Navbar = ({
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
                 >
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200' }}>
                     <Store size={15} />
                   </div>
                   <div>
@@ -286,7 +286,7 @@ export const Navbar = ({
               <button
                 onClick={onOpenSellerRegister}
                 className="btn btn-secondary btn-sm"
-                style={{ borderColor: 'rgba(204, 255, 0, 0.4)', color: '#ccff00' }}
+                style={{ borderColor: 'rgba(255, 242, 0, 0.4)', color: '#fff200' }}
               >
                 <Store size={15} />
                 <span>Launch Venture</span>
@@ -300,26 +300,63 @@ export const Navbar = ({
               {/* Role Indicator & Portal Switcher */}
               {currentUser.role === 'seller' ? (
                 <>
+                  {currentView !== 'seller' ? (
+                    <button
+                      onClick={() => setCurrentView('seller')}
+                      className="btn btn-primary btn-sm"
+                      title="Return to your Stall Management & Add Items"
+                      style={{
+                        gap: '0.45rem',
+                        boxShadow: '0 0 16px rgba(255, 242, 0, 0.45)',
+                        fontWeight: 800,
+                      }}
+                    >
+                      <Store size={15} />
+                      <span>Seller Portal (Add Items)</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setCurrentView('landing')}
+                        className="btn btn-ghost btn-sm"
+                        title="View Home Page"
+                        style={{ gap: '0.35rem', color: '#a1a1aa' }}
+                      >
+                        <ArrowRightLeft size={14} />
+                        <span>Home</span>
+                      </button>
+                      <button
+                        onClick={() => setCurrentView('customer')}
+                        className="btn btn-ghost btn-sm"
+                        title="Preview Customer Storefront"
+                        style={{ gap: '0.35rem', color: '#a1a1aa' }}
+                      >
+                        <ShoppingBag size={14} />
+                        <span>Storefront</span>
+                      </button>
+                    </>
+                  )}
                   <button
-                    onClick={() => setCurrentView('customer')}
-                    className="btn btn-ghost btn-sm"
-                    title="Preview Customer Storefront"
-                    style={{ gap: '0.35rem', color: '#a1a1aa' }}
+                    onClick={() => setCurrentView('seller')}
+                    className="badge badge-iedc"
+                    style={{
+                      padding: '0.4rem 0.85rem',
+                      cursor: 'pointer',
+                      border: currentView === 'seller' ? '1px solid #fff200' : '1px dashed rgba(255, 242, 0, 0.5)',
+                      background: 'none',
+                    }}
+                    title="Click to open Seller Dashboard"
                   >
-                    <ArrowRightLeft size={14} />
-                    <span>Customer View</span>
-                  </button>
-                  <div className="badge badge-iedc" style={{ padding: '0.4rem 0.85rem' }}>
                     <Store size={14} />
                     <span>{currentUser.storeName || 'Stall Hub'}</span>
-                  </div>
+                  </button>
                 </>
               ) : currentUser.role === 'admin' ? (
                 <>
                   <button
                     onClick={onOpenAdminApproval}
                     className="btn btn-secondary btn-sm"
-                    style={{ borderColor: '#ccff00', color: '#ccff00', background: 'rgba(204, 255, 0, 0.1)' }}
+                    style={{ borderColor: '#fff200', color: '#fff200', background: 'rgba(255, 242, 0, 0.1)' }}
                   >
                     <ShieldCheck size={15} />
                     <span>Review Ventures ({pendingCount})</span>
@@ -338,13 +375,13 @@ export const Navbar = ({
                     {activeCustomerOrders > 0 && (
                       <span
                         style={{
-                          backgroundColor: '#ccff00',
+                          backgroundColor: '#fff200',
                           color: '#000000',
                           fontSize: '0.7rem',
                           fontWeight: 800,
                           borderRadius: '9999px',
                           padding: '1px 6px',
-                          boxShadow: '0 0 10px rgba(204, 255, 0, 0.5)',
+                          boxShadow: '0 0 10px rgba(255, 242, 0, 0.5)',
                         }}
                       >
                         {activeCustomerOrders}
@@ -363,12 +400,12 @@ export const Navbar = ({
                       <span
                         style={{
                           backgroundColor: '#000000',
-                          color: '#ccff00',
+                          color: '#fff200',
                           fontSize: '0.75rem',
                           fontWeight: 800,
                           borderRadius: '9999px',
                           padding: '1px 7px',
-                          border: '1px solid #ccff00',
+                          border: '1px solid #fff200',
                         }}
                       >
                         {cartItemCount}
@@ -391,8 +428,8 @@ export const Navbar = ({
                     height: '36px',
                     borderRadius: '50%',
                     objectFit: 'cover',
-                    border: '2px solid #ccff00',
-                    boxShadow: '0 0 10px rgba(204, 255, 0, 0.3)',
+                    border: '2px solid #fff200',
+                    boxShadow: '0 0 10px rgba(255, 242, 0, 0.3)',
                   }}
                 />
                 <button

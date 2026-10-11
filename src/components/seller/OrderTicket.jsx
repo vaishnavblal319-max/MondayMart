@@ -46,8 +46,8 @@ export const OrderTicket = ({ order }) => {
       style={{
         background: '#14141b',
         borderRadius: '18px',
-        border: isCompleted ? '1.5px solid rgba(16, 185, 129, 0.4)' : '1.5px solid rgba(204, 255, 0, 0.45)',
-        boxShadow: isCompleted ? 'var(--shadow-sm)' : '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(204, 255, 0, 0.15)',
+        border: isCompleted ? '1.5px solid rgba(16, 185, 129, 0.4)' : '1.5px solid rgba(255, 242, 0, 0.45)',
+        boxShadow: isCompleted ? 'var(--shadow-sm)' : '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 242, 0, 0.15)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
@@ -57,7 +57,7 @@ export const OrderTicket = ({ order }) => {
       <div
         style={{
           padding: '1rem 1.25rem',
-          background: isCompleted ? 'rgba(16, 185, 129, 0.1)' : 'rgba(204, 255, 0, 0.08)',
+          background: isCompleted ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 242, 0, 0.08)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           alignItems: 'center',
@@ -96,7 +96,7 @@ export const OrderTicket = ({ order }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <User size={16} color="#ccff00" />
+            <User size={16} color="#fff200" />
             <span style={{ fontWeight: 700, color: '#ffffff' }}>{order.customer.name}</span>
           </div>
 
@@ -127,7 +127,7 @@ export const OrderTicket = ({ order }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span
                     style={{
-                      background: '#ccff00',
+                      background: '#fff200',
                       color: '#000000',
                       fontWeight: 800,
                       borderRadius: '6px',
@@ -140,7 +140,7 @@ export const OrderTicket = ({ order }) => {
                   </span>
                   <span style={{ fontWeight: 600, color: '#ffffff' }}>{it.product.name}</span>
                 </div>
-                <span style={{ fontWeight: 700, color: '#ccff00', fontFamily: 'var(--font-heading)' }}>
+                <span style={{ fontWeight: 700, color: '#fff200', fontFamily: 'var(--font-heading)' }}>
                   {formatCurrency(it.unitPrice * it.quantity)}
                 </span>
               </div>
@@ -149,9 +149,9 @@ export const OrderTicket = ({ order }) => {
         </div>
 
         {/* Total Bill */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)', fontWeight: 800 }}>
+        <div style={{ display: 'flex', borderTop: '1px solid rgba(255, 255, 255, 0.1)', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.5rem', fontWeight: 800 }}>
           <span style={{ color: '#a1a1aa' }}>Order Total:</span>
-          <span style={{ fontSize: '1.25rem', color: '#ccff00', fontFamily: 'var(--font-heading)' }}>
+          <span style={{ fontSize: '1.25rem', color: '#fff200', fontFamily: 'var(--font-heading)' }}>
             {formatCurrency(order.totalAmount)}
           </span>
         </div>
@@ -163,7 +163,7 @@ export const OrderTicket = ({ order }) => {
               <button
                 onClick={() => updateOrderStatus(order.id, 'preparing')}
                 className="btn btn-secondary btn-sm"
-                style={{ flex: 1, gap: '0.35rem', borderColor: 'rgba(204, 255, 0, 0.35)', color: '#ccff00' }}
+                style={{ flex: 1, gap: '0.35rem', borderColor: 'rgba(255, 242, 0, 0.35)', color: '#fff200' }}
               >
                 <ChefHat size={15} />
                 <span>Start Preparing</span>
@@ -205,7 +205,7 @@ export const OrderTicket = ({ order }) => {
           <div
             style={{
               background: '#181824',
-              border: '1.5px dashed rgba(204, 255, 0, 0.45)',
+              border: '1.5px dashed rgba(255, 242, 0, 0.45)',
               borderRadius: '14px',
               padding: '1rem',
               marginTop: 'auto',
@@ -213,11 +213,11 @@ export const OrderTicket = ({ order }) => {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 700, color: '#ffffff' }}>
-                <ShieldCheck size={16} color="#ccff00" />
+                <ShieldCheck size={16} color="#fff200" />
                 <span>Verify Pickup with Customer PIN</span>
               </div>
               <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>
-                Expected: <strong style={{ fontFamily: 'var(--font-mono)', color: '#ccff00', fontSize: '0.95rem' }}>{order.pin}</strong>
+                Expected: <strong style={{ fontFamily: 'var(--font-mono)', color: '#fff200', fontSize: '0.95rem' }}>{order.pin}</strong>
               </span>
             </div>
 
@@ -243,9 +243,9 @@ export const OrderTicket = ({ order }) => {
                   fontSize: '1.15rem',
                   letterSpacing: '0.15em',
                   borderRadius: '8px',
-                  border: '1.5px solid #ccff00',
+                  border: '1.5px solid #fff200',
                   background: '#09090b',
-                  color: '#ccff00',
+                  color: '#fff200',
                   padding: '0.45rem',
                 }}
               />
@@ -262,7 +262,7 @@ export const OrderTicket = ({ order }) => {
                 width: '100%',
                 background: 'none',
                 border: 'none',
-                color: '#ccff00',
+                color: '#fff200',
                 fontSize: '0.75rem',
                 fontWeight: 600,
                 cursor: 'pointer',

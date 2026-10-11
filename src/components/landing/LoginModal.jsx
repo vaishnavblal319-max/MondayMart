@@ -19,6 +19,11 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
       return;
     }
 
+    if (!password.trim()) {
+      setError('Please enter your password');
+      return;
+    }
+
     const result = login(email, password);
     if (result.success) {
       onSuccessLogin(result.role);
@@ -30,7 +35,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
 
   const handleQuickFill = (demoEmail) => {
     setEmail(demoEmail);
-    setPassword('password123');
+    setPassword('');
     setError('');
   };
 
@@ -39,7 +44,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.3)' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.3)' }}>
               <Lock size={18} />
             </div>
             <div>
@@ -87,7 +92,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
               lineHeight: 1.45,
             }}
           >
-            <div style={{ fontWeight: 700, color: '#ccff00', marginBottom: '0.3rem', fontFamily: 'var(--font-heading)' }}>
+            <div style={{ fontWeight: 700, color: '#fff200', marginBottom: '0.3rem', fontFamily: 'var(--font-heading)' }}>
               ⚡ Smart Role Detection:
             </div>
             <ul style={{ paddingLeft: '1.2rem', margin: 0, color: '#a1a1aa' }}>
@@ -103,7 +108,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div style={{ position: 'relative' }}>
-              <Mail size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Mail size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="email"
                 className="form-input"
@@ -117,16 +122,17 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password <span style={{ color: '#71717a', fontWeight: 400 }}>(any value accepted in demo)</span></label>
+            <label className="form-label">Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Lock size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="password"
                 className="form-input"
                 style={{ paddingLeft: '2.5rem' }}
-                placeholder="demo mode — any password works"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
           </div>
@@ -157,7 +163,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
                 className="btn btn-secondary btn-sm"
                 style={{ fontSize: '0.75rem', padding: '0.45rem 0.25rem', gap: '0.3rem' }}
               >
-                <Store size={13} color="#ccff00" />
+                <Store size={13} color="#fff200" />
                 <span>Seller</span>
               </button>
               <button
@@ -181,7 +187,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
               onClose();
               onOpenCustomerRegister();
             }}
-            style={{ background: 'none', border: 'none', color: '#ccff00', fontWeight: 700, cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: '#fff200', fontWeight: 700, cursor: 'pointer' }}
           >
             Register as Customer
           </button>

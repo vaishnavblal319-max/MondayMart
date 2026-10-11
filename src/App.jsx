@@ -9,6 +9,7 @@ import { CustomerRegisterModal } from './components/landing/CustomerRegisterModa
 import { SellerRegisterModal } from './components/seller-onboarding/SellerRegisterModal';
 import { OtpVerificationModal } from './components/seller-onboarding/OtpVerificationModal';
 import { AdminApprovalModal } from './components/admin/AdminApprovalModal';
+import { AdminPostersModal } from './components/admin/AdminPostersModal';
 import { CustomerDashboard } from './components/customer/CustomerDashboard';
 import { CartDrawer } from './components/customer/CartDrawer';
 import { OrderSuccessModal } from './components/customer/OrderSuccessModal';
@@ -38,6 +39,7 @@ const MainApp = () => {
   const [isSellerRegisterOpen, setIsSellerRegisterOpen] = useState(false);
   const [isOtpOpen, setIsOtpOpen] = useState(false);
   const [isAdminApprovalOpen, setIsAdminApprovalOpen] = useState(false);
+  const [isAdminPostersOpen, setIsAdminPostersOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isFirebaseSetupOpen, setIsFirebaseSetupOpen] = useState(false);
@@ -141,6 +143,8 @@ const MainApp = () => {
             onOpenSellerRegister={() => setIsSellerRegisterOpen(true)}
             onOpenCustomerRegister={() => setIsCustomerRegisterOpen(true)}
             onOpenLogin={() => setIsLoginOpen(true)}
+            onOpenAdminPosters={() => setIsAdminPostersOpen(true)}
+            onSwitchToSeller={() => setCurrentView('seller')}
           />
         )}
 
@@ -151,7 +155,12 @@ const MainApp = () => {
           />
         )}
 
-        {currentView === 'seller' && <SellerDashboard />}
+        {currentView === 'seller' && (
+          <SellerDashboard
+            onSwitchToCustomer={() => setCurrentView('customer')}
+            onSwitchToLanding={() => setCurrentView('landing')}
+          />
+        )}
       </main>
 
       {/* Modals & Drawers */}
@@ -190,6 +199,11 @@ const MainApp = () => {
         isOpen={isAdminApprovalOpen}
         onClose={() => setIsAdminApprovalOpen(false)}
         onSwitchToSeller={() => setCurrentView('seller')}
+      />
+
+      <AdminPostersModal
+        isOpen={isAdminPostersOpen}
+        onClose={() => setIsAdminPostersOpen(false)}
       />
 
       <CartDrawer

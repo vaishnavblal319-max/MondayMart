@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ArrowRight,
   QrCode,
@@ -8,33 +8,701 @@ import {
   Rocket,
   Award,
   Store,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Sparkles,
+  Flame,
+  Plus,
+  Minus,
+  Check,
 } from 'lucide-react';
 import { useMarket } from '../../context/MarketContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../utils/helpers';
+import { PromotionalBannerCarousel } from './PromotionalBannerCarousel';
 
 export const LandingPage = ({
   onExploreMenu,
   onOpenSellerRegister,
   onOpenCustomerRegister: _onOpenCustomerRegister,
   onOpenLogin,
+  onOpenAdminPosters,
+  onSwitchToSeller,
 }) => {
-  const { products } = useMarket();
-  const featured = products.slice(0, 4);
+  const { products, cart, addToCart, removeFromCart } = useMarket();
+  const { currentUser } = useAuth();
+
+  // Full Menu toggle state
+  const [showFullMenu, setShowFullMenu] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [vegOnly, setVegOnly] = useState(false);
+
+  // Shortlisted items (top 4 featured specials)
+  const shortlistedItems = useMemo(() => {
+    return products.slice(0, 4);
+  }, [products]);
+
+  // Categories list
+  const categories = useMemo(() => {
+    const set = new Set(['All']);
+    products.forEach((p) => {
+      if (p.category) set.add(p.category);
+    });
+    return Array.from(set);
+  }, [products]);
+
+  // Filtered products when "Show Full Menu" is expanded
+  const fullFilteredProducts = useMemo(() => {
+    return products.filter((item) => {
+      const matchesCategory =
+        selectedCategory === 'All' || item.category === selectedCategory;
+      const matchesSearch =
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.sellerStore?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesVeg = vegOnly ? item.isVeg : true;
+      return matchesCategory && matchesSearch && matchesVeg;
+    });
+  }, [products, selectedCategory, searchQuery, vegOnly]);
 
   return (
     <div style={{ paddingBottom: '5rem' }}>
-      {/* Hero Section */}
+      {/* ──────────────────────────────────────────────────────────────────────────
+          1. FIRST SECTION: CATCHY HEADER & AMAZON/FLIPKART STYLE SWIPEABLE POSTERS
+          ────────────────────────────────────────────────────────────────────────── */}
+      <section
+        style={{
+          padding: '2.5rem 0 1rem',
+          background: 'linear-gradient(180deg, rgba(255, 242, 0, 0.05) 0%, rgba(9, 9, 11, 0) 100%)',
+        }}
+      >
+        <div className="container">
+          {/* Catchy Top Pitch / Announcement Ticker */}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              marginBottom: '1.75rem',
+            }}
+          >
+            <div>
+              <div
+                className="badge badge-iedc"
+                style={{
+                  padding: '0.45rem 1rem',
+                  fontSize: '0.78rem',
+                  marginBottom: '0.65rem',
+                  gap: '0.45rem',
+                }}
+              >
+                <Flame size={14} color="#fff200" />
+                <span>HOT CAMPUS DEALS & STUDENT VENTURES</span>
+              </div>
+              <h1
+                style={{
+                  fontSize: 'clamp(1.8rem, 3.6vw, 2.7rem)',
+                  fontWeight: 800,
+                  lineHeight: 1.15,
+                  color: '#ffffff',
+                  fontFamily: 'var(--font-heading)',
+                }}
+              >
+                Campus Buzz, Announcements &{' '}
+                <span className="text-neon" style={{ color: '#fff200' }}>
+                  Zero Queues.
+                </span>
+              </h1>
+              <p style={{ color: '#a1a1aa', fontSize: '1rem', marginTop: '0.35rem', maxWidth: '620px' }}>
+                Browse official campus event brochures and notices below, pre-order from student culinary ventures, and pick up in seconds with verified PIN passes.
+              </p>
+            </div>
+
+            {/* Quick action buttons */}
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <button onClick={onExploreMenu} className="btn btn-secondary btn-sm" style={{ gap: '0.4rem' }}>
+                <ShoppingBag size={16} />
+                <span>View Menu</span>
+              </button>
+              {currentUser?.role === 'seller' ? (
+                <button
+                  onClick={onSwitchToSeller}
+                  className="btn btn-primary btn-sm"
+                  style={{ gap: '0.45rem', boxShadow: '0 0 16px rgba(255, 242, 0, 0.45)', fontWeight: 800 }}
+                >
+                  <Store size={16} />
+                  <span>Seller Portal (Add Items & Orders)</span>
+                </button>
+              ) : (
+                <button
+                  onClick={onOpenSellerRegister}
+                  className="btn btn-secondary btn-sm"
+                  style={{ borderColor: 'rgba(255, 242, 0, 0.4)', color: '#fff200' }}
+                >
+                  <Rocket size={16} />
+                  <span>Open Stall</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Swipeable Hero Posters / Brochures Carousel */}
+          <PromotionalBannerCarousel
+            onOpenAdminPosters={onOpenAdminPosters}
+          />
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          2. SECOND SECTION: SHORTLISTED MENU & OPTION TO SHOW FULL MENU
+          ────────────────────────────────────────────────────────────────────────── */}
+      <section
+        id="shortlisted-menu-section"
+        style={{
+          padding: '2.5rem 0 4rem',
+          backgroundColor: '#0c0c10',
+          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        }}
+      >
+        <div className="container">
+          {/* Section Header with "Show Full Menu" Toggle */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              marginBottom: '2rem',
+              flexWrap: 'wrap',
+              gap: '1.25rem',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                <span
+                  className="badge"
+                  style={{
+                    backgroundColor: 'rgba(255, 242, 0, 0.15)',
+                    color: '#fff200',
+                    border: '1px solid rgba(255, 242, 0, 0.35)',
+                    fontSize: '0.72rem',
+                  }}
+                >
+                  <Sparkles size={13} />
+                  <span>CURATED CAMPUS SPECIALS</span>
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>
+                  {showFullMenu ? `Showing ${fullFilteredProducts.length} items` : `Showing 4 Shortlisted Items`}
+                </span>
+              </div>
+              <h2
+                style={{
+                  fontSize: 'clamp(1.6rem, 2.8vw, 2.2rem)',
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  fontFamily: 'var(--font-heading)',
+                }}
+              >
+                {showFullMenu ? 'Complete Campus Menu' : "Today's Shortlisted Menu"}
+              </h2>
+              <p style={{ color: '#a1a1aa', fontSize: '0.92rem', marginTop: '0.25rem' }}>
+                {showFullMenu
+                  ? 'Explore the entire catalog of snacks, meals, drinks & bakery from student stalls.'
+                  : 'Handpicked top-rated student specialties ready for express pickup.'}
+              </p>
+            </div>
+
+            {/* Toggle Button for Full Menu */}
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setShowFullMenu(!showFullMenu)}
+                className="btn btn-primary"
+                style={{
+                  gap: '0.5rem',
+                  padding: '0.65rem 1.35rem',
+                  borderRadius: '12px',
+                  boxShadow: '0 0 20px rgba(255, 242, 0, 0.35)',
+                }}
+              >
+                {showFullMenu ? (
+                  <>
+                    <span>Hide Full Menu (Show Shortlisted)</span>
+                    <ChevronUp size={18} />
+                  </>
+                ) : (
+                  <>
+                    <span>Show Full Menu</span>
+                    <ChevronDown size={18} />
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={onExploreMenu}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.65rem 1.2rem',
+                  borderRadius: '12px',
+                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  gap: '0.45rem',
+                }}
+              >
+                <span>Full Order Dashboard</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Expanded Full Menu Filters (Shown only when showFullMenu is TRUE) */}
+          {showFullMenu && (
+            <div
+              style={{
+                backgroundColor: '#121217',
+                borderRadius: '18px',
+                padding: '1.25rem',
+                marginBottom: '2rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                animation: 'slideUp 0.25s ease-out',
+              }}
+            >
+              {/* Search + Veg Toggle */}
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+                  <Search
+                    size={18}
+                    color="#fff200"
+                    style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search dishes, drinks, or student stalls..."
+                    className="form-input"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ paddingLeft: '2.5rem' }}
+                  />
+                </div>
+
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: vegOnly ? '#10b981' : '#a1a1aa',
+                    padding: '0.6rem 1rem',
+                    backgroundColor: vegOnly ? 'rgba(16, 185, 129, 0.15)' : '#181822',
+                    borderRadius: '10px',
+                    border: vegOnly ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.12)',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={vegOnly}
+                    onChange={(e) => setVegOnly(e.target.checked)}
+                    style={{ accentColor: '#10b981' }}
+                  />
+                  <span>Pure Veg Only</span>
+                </label>
+              </div>
+
+              {/* Category Pills */}
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    style={{
+                      padding: '0.4rem 0.95rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'var(--transition)',
+                      border: selectedCategory === cat ? '1px solid #fff200' : '1px solid rgba(255, 255, 255, 0.12)',
+                      backgroundColor: selectedCategory === cat ? '#fff200' : '#181824',
+                      color: selectedCategory === cat ? '#000000' : '#d4d4d8',
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Cards Grid: Shortlisted or Full */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))',
+              gap: '1.75rem',
+            }}
+          >
+            {/* When showFullMenu is FALSE: Render the 4 Shortlisted Items */}
+            {!showFullMenu ? (
+              shortlistedItems.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem', color: '#a1a1aa' }}>
+                  No items listed yet. Student vendors are setting up!
+                </div>
+              ) : (
+                shortlistedItems.map((item) => {
+                  const qtyInCart = cart[item.id] || 0;
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        background: '#121217',
+                        borderRadius: '20px',
+                        overflow: 'hidden',
+                        boxShadow: 'var(--shadow-md)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'var(--transition)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#fff200';
+                        e.currentTarget.style.transform = 'translateY(-3px)';
+                        e.currentTarget.style.boxShadow = '0 12px 35px rgba(0,0,0,0.8), 0 0 20px rgba(255, 242, 0, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                      }}
+                    >
+                      {/* Image */}
+                      <div style={{ position: 'relative', height: '185px' }}>
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                          <span className={item.isVeg ? 'badge badge-veg' : 'badge badge-non-veg'}>
+                            {item.isVeg ? '● VEG' : '▲ NON-VEG'}
+                          </span>
+                        </div>
+                        <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                          <span
+                            className="badge"
+                            style={{
+                              background: '#000000',
+                              color: '#fff200',
+                              border: '1px solid rgba(255, 242, 0, 0.4)',
+                              backdropFilter: 'blur(6px)',
+                            }}
+                          >
+                            ★ {item.rating}
+                          </span>
+                        </div>
+                        <div style={{ position: 'absolute', bottom: '10px', left: '10px' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              backgroundColor: 'rgba(9, 9, 11, 0.85)',
+                              color: '#d4d4d8',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                          >
+                            {item.sellerStore || 'Campus Stall'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem', color: '#ffffff' }}>
+                          {item.name}
+                        </h4>
+                        <p style={{ fontSize: '0.82rem', color: '#a1a1aa', marginBottom: '1.25rem', flex: 1, lineHeight: 1.5 }}>
+                          {item.description}
+                        </p>
+
+                        {/* Price & Cart Actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                          <div>
+                            <span style={{ fontSize: '0.72rem', color: '#71717a', textTransform: 'uppercase', display: 'block' }}>
+                              Price
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '1.35rem',
+                                fontWeight: 800,
+                                color: '#fff200',
+                                fontFamily: 'var(--font-heading)',
+                              }}
+                            >
+                              {formatCurrency(item.price)}
+                            </span>
+                          </div>
+
+                          {qtyInCart > 0 ? (
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.45rem',
+                                backgroundColor: '#181824',
+                                borderRadius: '10px',
+                                padding: '3px',
+                                border: '1px solid #fff200',
+                              }}
+                            >
+                              <button
+                                onClick={() => removeFromCart(item.id)}
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  backgroundColor: '#272733',
+                                  color: '#fff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span style={{ fontWeight: 800, padding: '0 6px', color: '#fff200', fontSize: '0.9rem' }}>
+                                {qtyInCart}
+                              </span>
+                              <button
+                                onClick={() => addToCart(item.id)}
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  backgroundColor: '#fff200',
+                                  color: '#000',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => addToCart(item.id)}
+                              className="btn btn-primary btn-sm"
+                              style={{ gap: '0.35rem' }}
+                            >
+                              <Plus size={15} />
+                              <span>Add to Order</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )
+            ) : (
+              /* When showFullMenu is TRUE: Render all filtered items */
+              fullFilteredProducts.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3.5rem', color: '#a1a1aa' }}>
+                  No campus specials found matching your filters.
+                </div>
+              ) : (
+                fullFilteredProducts.map((item) => {
+                  const qtyInCart = cart[item.id] || 0;
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        background: '#121217',
+                        borderRadius: '20px',
+                        overflow: 'hidden',
+                        boxShadow: 'var(--shadow-md)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'var(--transition)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#fff200';
+                        e.currentTarget.style.transform = 'translateY(-3px)';
+                        e.currentTarget.style.boxShadow = '0 12px 35px rgba(0,0,0,0.8), 0 0 20px rgba(255, 242, 0, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                      }}
+                    >
+                      {/* Image */}
+                      <div style={{ position: 'relative', height: '185px' }}>
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                          <span className={item.isVeg ? 'badge badge-veg' : 'badge badge-non-veg'}>
+                            {item.isVeg ? '● VEG' : '▲ NON-VEG'}
+                          </span>
+                        </div>
+                        <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                          <span
+                            className="badge"
+                            style={{
+                              background: '#000000',
+                              color: '#fff200',
+                              border: '1px solid rgba(255, 242, 0, 0.4)',
+                              backdropFilter: 'blur(6px)',
+                            }}
+                          >
+                            ★ {item.rating}
+                          </span>
+                        </div>
+                        <div style={{ position: 'absolute', bottom: '10px', left: '10px' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              backgroundColor: 'rgba(9, 9, 11, 0.85)',
+                              color: '#d4d4d8',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                          >
+                            {item.sellerStore || 'Campus Stall'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem', color: '#ffffff' }}>
+                          {item.name}
+                        </h4>
+                        <p style={{ fontSize: '0.82rem', color: '#a1a1aa', marginBottom: '1.25rem', flex: 1, lineHeight: 1.5 }}>
+                          {item.description}
+                        </p>
+
+                        {/* Price & Cart Actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                          <div>
+                            <span style={{ fontSize: '0.72rem', color: '#71717a', textTransform: 'uppercase', display: 'block' }}>
+                              Price
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '1.35rem',
+                                fontWeight: 800,
+                                color: '#fff200',
+                                fontFamily: 'var(--font-heading)',
+                              }}
+                            >
+                              {formatCurrency(item.price)}
+                            </span>
+                          </div>
+
+                          {qtyInCart > 0 ? (
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.45rem',
+                                backgroundColor: '#181824',
+                                borderRadius: '10px',
+                                padding: '3px',
+                                border: '1px solid #fff200',
+                              }}
+                            >
+                              <button
+                                onClick={() => removeFromCart(item.id)}
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  backgroundColor: '#272733',
+                                  color: '#fff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span style={{ fontWeight: 800, padding: '0 6px', color: '#fff200', fontSize: '0.9rem' }}>
+                                {qtyInCart}
+                              </span>
+                              <button
+                                onClick={() => addToCart(item.id)}
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  backgroundColor: '#fff200',
+                                  color: '#000',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => addToCart(item.id)}
+                              className="btn btn-primary btn-sm"
+                              style={{ gap: '0.35rem' }}
+                            >
+                              <Plus size={15} />
+                              <span>Add to Order</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          3. THIRD SECTION: THE DESCRIPTION WHICH WAS EARLIER AT THE FIRST
+             (Hero Pitch, IEDC Hub Details, QR & PIN Simulation, How It Operates)
+          ────────────────────────────────────────────────────────────────────────── */}
       <section
         style={{
           position: 'relative',
           overflow: 'hidden',
           padding: '4.5rem 0 3.5rem',
-          background: 'linear-gradient(180deg, rgba(204, 255, 0, 0.05) 0%, rgba(9, 9, 11, 0) 100%)',
+          background: 'linear-gradient(180deg, rgba(9, 9, 11, 0) 0%, rgba(255, 242, 0, 0.04) 50%, rgba(9, 9, 11, 0) 100%)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         }}
       >
         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3.5rem', alignItems: 'center' }}>
-          {/* Left Column: Hero Pitch */}
+          {/* Left Column: The Original Hero Pitch & Description */}
           <div>
             <div
               className="badge badge-iedc"
@@ -45,13 +713,13 @@ export const LandingPage = ({
                 gap: '0.5rem',
               }}
             >
-              <Zap size={14} color="#ccff00" />
+              <Zap size={14} color="#fff200" />
               <span>IEDC Student Innovation & Entrepreneurship Hub</span>
             </div>
 
-            <h1
+            <h2
               style={{
-                fontSize: 'clamp(2.4rem, 4.8vw, 3.8rem)',
+                fontSize: 'clamp(2.2rem, 4.2vw, 3.4rem)',
                 lineHeight: 1.15,
                 fontWeight: 800,
                 color: '#ffffff',
@@ -60,11 +728,11 @@ export const LandingPage = ({
               }}
             >
               Empowering Student Ventures.{' '}
-              <span className="text-neon">
+              <span className="text-neon" style={{ color: '#fff200' }}>
                 Zero Queue.
               </span>{' '}
               Instant QR & PIN Pickup.
-            </h1>
+            </h2>
 
             <p
               style={{
@@ -88,7 +756,7 @@ export const LandingPage = ({
               <button
                 onClick={onOpenSellerRegister}
                 className="btn btn-secondary btn-lg"
-                style={{ borderColor: 'rgba(204, 255, 0, 0.4)', color: '#ccff00' }}
+                style={{ borderColor: 'rgba(255, 242, 0, 0.4)', color: '#fff200' }}
               >
                 <Rocket size={20} />
                 <span>Launch Student Venture</span>
@@ -102,7 +770,7 @@ export const LandingPage = ({
                 <span>Verified IEDC Campus Stalls</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#d4d4d8' }}>
-                <QrCode size={18} color="#ccff00" />
+                <QrCode size={18} color="#fff200" />
                 <span>PIN-Secured Pickup Protocol</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#d4d4d8' }}>
@@ -112,22 +780,22 @@ export const LandingPage = ({
             </div>
           </div>
 
-          {/* Right Column: Interactive Visual Showcase */}
+          {/* Right Column: Interactive Visual Showcase with PIN & QR */}
           <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
             <div
               style={{
                 background: '#121217',
                 borderRadius: '24px',
                 padding: '1.5rem',
-                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(204, 255, 0, 0.15)',
-                border: '1px solid rgba(204, 255, 0, 0.3)',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 242, 0, 0.15)',
+                border: '1px solid rgba(255, 242, 0, 0.3)',
                 maxWidth: '400px',
                 width: '100%',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <span className="badge badge-success" style={{ fontSize: '0.72rem' }}>● LIVE VENTURE SIMULATION</span>
-                <span style={{ fontSize: '0.8rem', color: '#ccff00', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#MM-IEDC84</span>
+                <span style={{ fontSize: '0.8rem', color: '#fff200', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#MM-IEDC84</span>
               </div>
 
               <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '180px', marginBottom: '1.25rem' }}>
@@ -148,7 +816,7 @@ export const LandingPage = ({
                   }}
                 >
                   <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Truffle Glazed Smash Burger</div>
-                  <div style={{ fontSize: '0.8rem', color: '#ccff00', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#fff200', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     <span>By The Burger Guild</span> • <span style={{ color: '#a1a1aa' }}>Stall #04 Campus Quad</span>
                   </div>
                 </div>
@@ -158,7 +826,7 @@ export const LandingPage = ({
               <div
                 style={{
                   background: '#09090b',
-                  border: '2px dashed rgba(204, 255, 0, 0.4)',
+                  border: '2px dashed rgba(255, 242, 0, 0.4)',
                   borderRadius: '16px',
                   padding: '1.2rem',
                   textAlign: 'center',
@@ -168,7 +836,7 @@ export const LandingPage = ({
                   Student Order Verification Pass
                 </div>
                 <div style={{ margin: '0.75rem 0' }}>
-                  <div className="pin-pill" style={{ fontSize: '1.4rem', padding: '0.4rem 1.2rem' }}>
+                  <div className="pin-pill" style={{ fontSize: '1.4rem', padding: '0.4rem 1.2rem', color: '#fff200', borderColor: '#fff200' }}>
                     7492
                   </div>
                 </div>
@@ -182,7 +850,9 @@ export const LandingPage = ({
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* ──────────────────────────────────────────────────────────────────────────
+          4. HOW IT WORKS SECTION (ECOSYSTEM ARCHITECTURE)
+          ────────────────────────────────────────────────────────────────────────── */}
       <section style={{ padding: '5rem 0 3.5rem' }}>
         <div className="container">
           <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 3.5rem' }}>
@@ -213,12 +883,12 @@ export const LandingPage = ({
                     width: '48px',
                     height: '48px',
                     borderRadius: '14px',
-                    backgroundColor: 'rgba(204, 255, 0, 0.12)',
+                    backgroundColor: 'rgba(255, 242, 0, 0.12)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#ccff00',
-                    border: '1px solid rgba(204, 255, 0, 0.3)',
+                    color: '#fff200',
+                    border: '1px solid rgba(255, 242, 0, 0.3)',
                   }}
                 >
                   <ShoppingBag size={24} />
@@ -231,7 +901,7 @@ export const LandingPage = ({
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div style={{ display: 'flex', gap: '0.85rem' }}>
-                  <span style={{ background: '#ccff00', color: '#000000', width: '26px', height: '26px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, flexShrink: 0 }}>
+                  <span style={{ background: '#fff200', color: '#000000', width: '26px', height: '26px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, flexShrink: 0 }}>
                     1
                   </span>
                   <div>
@@ -241,7 +911,7 @@ export const LandingPage = ({
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.85rem' }}>
-                  <span style={{ background: '#ccff00', color: '#000000', width: '26px', height: '26px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, flexShrink: 0 }}>
+                  <span style={{ background: '#fff200', color: '#000000', width: '26px', height: '26px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, flexShrink: 0 }}>
                     2
                   </span>
                   <div>
@@ -251,7 +921,7 @@ export const LandingPage = ({
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.85rem' }}>
-                  <span style={{ background: '#ccff00', color: '#000000', width: '26px', height: '26px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, flexShrink: 0 }}>
+                  <span style={{ background: '#fff200', color: '#000000', width: '26px', height: '26px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, flexShrink: 0 }}>
                     3
                   </span>
                   <div>
@@ -269,7 +939,7 @@ export const LandingPage = ({
                 borderRadius: '20px',
                 padding: '2.25rem',
                 boxShadow: 'var(--shadow-md)',
-                border: '1px solid rgba(204, 255, 0, 0.25)',
+                border: '1px solid rgba(255, 242, 0, 0.25)',
                 transition: 'var(--transition)',
               }}
             >
@@ -279,12 +949,12 @@ export const LandingPage = ({
                     width: '48px',
                     height: '48px',
                     borderRadius: '14px',
-                    backgroundColor: 'rgba(204, 255, 0, 0.15)',
+                    backgroundColor: 'rgba(255, 242, 0, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#ccff00',
-                    border: '1px solid #ccff00',
+                    color: '#fff200',
+                    border: '1px solid #fff200',
                   }}
                 >
                   <Store size={24} />
@@ -331,110 +1001,9 @@ export const LandingPage = ({
         </div>
       </section>
 
-      {/* Popular Items Teaser */}
-      <section style={{ padding: '3rem 0 4.5rem', backgroundColor: '#0d0d12', borderTop: '1px solid rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <span className="badge badge-iedc" style={{ marginBottom: '0.5rem' }}>TOP STALL SPECIALS TODAY</span>
-              <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff' }}>Trending Campus Delights</h2>
-            </div>
-            <button onClick={onExploreMenu} className="btn btn-outline-neon btn-sm" style={{ gap: '0.4rem' }}>
-              <span>View Full Campus Menu</span>
-              <ArrowRight size={16} />
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.75rem' }}>
-            {featured.length === 0 ? (
-              /* Placeholder cards shown when no products listed yet */
-              [1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: '#121217',
-                    borderRadius: '18px',
-                    overflow: 'hidden',
-                    border: '1px dashed rgba(204, 255, 0, 0.2)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: '280px',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.75rem',
-                    color: '#3f3f46',
-                    padding: '2rem',
-                    textAlign: 'center',
-                  }}
-                >
-                  <Store size={32} color="#3f3f46" />
-                  <div style={{ fontSize: '0.85rem', color: '#52525b', fontWeight: 600 }}>Stall Opening Soon</div>
-                  <div style={{ fontSize: '0.75rem', color: '#3f3f46' }}>Vendor listing products...</div>
-                </div>
-              ))
-            ) : (
-              featured.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    background: '#121217',
-                    borderRadius: '18px',
-                    overflow: 'hidden',
-                    boxShadow: 'var(--shadow-md)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'var(--transition)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#ccff00';
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(204, 255, 0, 0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                  }}
-                >
-                  <div style={{ position: 'relative', height: '170px' }}>
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-                      <span className={item.isVeg ? 'badge badge-veg' : 'badge badge-non-veg'}>
-                        {item.isVeg ? '● VEG' : '▲ NON-VEG'}
-                      </span>
-                    </div>
-                    <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
-                      <span className="badge" style={{ background: '#000000', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.4)' }}>
-                        ★ {item.rating}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.35rem', color: '#ffffff' }}>{item.name}</h4>
-                    <p style={{ fontSize: '0.82rem', color: '#a1a1aa', marginBottom: '1.25rem', flex: 1 }}>
-                      {item.description}
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-                      <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ccff00', fontFamily: 'var(--font-heading)' }}>
-                        {formatCurrency(item.price)}
-                      </span>
-                      <button onClick={onExploreMenu} className="btn btn-primary btn-sm">Order</button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Seller Callout Banner */}
+      {/* ──────────────────────────────────────────────────────────────────────────
+          5. SELLER CALLOUT BANNER (LAUNCH VENTURE WITH IEDC)
+          ────────────────────────────────────────────────────────────────────────── */}
       <section style={{ padding: '3.5rem 0 1rem' }}>
         <div className="container">
           <div
@@ -448,8 +1017,8 @@ export const LandingPage = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '2.5rem',
-              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(204, 255, 0, 0.12)',
-              border: '1px solid rgba(204, 255, 0, 0.4)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(255, 242, 0, 0.12)',
+              border: '1px solid rgba(255, 242, 0, 0.4)',
             }}
           >
             <div style={{ maxWidth: '640px' }}>
@@ -465,13 +1034,26 @@ export const LandingPage = ({
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <button onClick={onOpenSellerRegister} className="btn btn-primary btn-lg">
-                <Rocket size={20} />
-                <span>Register Your Venture</span>
-              </button>
-              <button onClick={onOpenLogin} className="btn btn-secondary btn-lg" style={{ background: '#181822', color: '#fff', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
-                <span>Seller Login</span>
-              </button>
+              {currentUser?.role === 'seller' ? (
+                <button
+                  onClick={onSwitchToSeller}
+                  className="btn btn-primary btn-lg"
+                  style={{ gap: '0.5rem', boxShadow: '0 0 25px rgba(255, 242, 0, 0.45)', fontWeight: 800 }}
+                >
+                  <Store size={22} />
+                  <span>Go to {currentUser.storeName || 'My Stall'} Dashboard</span>
+                </button>
+              ) : (
+                <>
+                  <button onClick={onOpenSellerRegister} className="btn btn-primary btn-lg">
+                    <Rocket size={20} />
+                    <span>Register Your Venture</span>
+                  </button>
+                  <button onClick={onOpenLogin} className="btn btn-secondary btn-lg" style={{ background: '#181822', color: '#fff', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
+                    <span>Seller Login</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -1,25 +1,26 @@
 /**
  * emailService.js
- * Sends OTP verification emails via EmailJS.
+ * Client-side Automated Emails via EmailJS (No backend server required).
  *
- * HOW TO SET UP (one-time):
- * 1. Go to https://www.emailjs.com and sign up (free tier = 200 emails/month).
- * 2. Add an Email Service (Gmail recommended) → note the Service ID.
- * 3. Create an Email Template with these variables:
- *      {{to_email}}    – recipient email
- *      {{to_name}}     – seller's name
- *      {{store_name}}  – their store/stall name
- *      {{otp_code}}    – the 6-digit code
- *      {{expiry_mins}} – how long the code is valid (e.g. 5)
- * 4. Copy your Public Key from Account → API Keys.
- * 5. Fill in the three constants below (or set as VITE_ env vars).
+ * Supported automated emails:
+ * 1. sendOtpEmail: 6-digit OTP code for student vendor onboarding.
+ * 2. sendOrderConfirmationEmail: Order receipt with 4-digit pickup PIN pass for customers.
+ * 3. sendVentureApprovalEmail: Official credentials sent to student founder upon incubation approval.
+ *
+ * HOW TO ACTIVATE IN .env:
+ *   VITE_EMAILJS_PUBLIC_KEY=your_public_key
+ *   VITE_EMAILJS_SERVICE_ID=your_service_id
+ *   VITE_EMAILJS_TEMPLATE_ID=your_template_id
+ *   (Optional dedicated templates):
+ *   VITE_EMAILJS_ORDER_TEMPLATE_ID=your_order_template_id
+ *   VITE_EMAILJS_APPROVAL_TEMPLATE_ID=your_approval_template_id
  */
 
-// ─── EmailJS Credentials ───────────────────────────────────────────────────
-// Replace these with your own values from https://www.emailjs.com/
-const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || 'YOUR_PUBLIC_KEY';
-const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID  || 'YOUR_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
+const EMAILJS_PUBLIC_KEY         = import.meta.env.VITE_EMAILJS_PUBLIC_KEY         || 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID         = import.meta.env.VITE_EMAILJS_SERVICE_ID         || 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID        = import.meta.env.VITE_EMAILJS_TEMPLATE_ID        || 'YOUR_TEMPLATE_ID';
+const EMAILJS_ORDER_TEMPLATE_ID   = import.meta.env.VITE_EMAILJS_ORDER_TEMPLATE_ID   || EMAILJS_TEMPLATE_ID;
+const EMAILJS_APPROVAL_TEMPLATE_ID= import.meta.env.VITE_EMAILJS_APPROVAL_TEMPLATE_ID|| EMAILJS_TEMPLATE_ID;
 
 let _initialized = false;
 
@@ -32,28 +33,23 @@ async function getEmailJS() {
   return emailjs;
 }
 
+export const isEmailConfigured = () => {
+  return (
+    EMAILJS_PUBLIC_KEY  !== 'YOUR_PUBLIC_KEY' &&
+    EMAILJS_SERVICE_ID  !== 'YOUR_SERVICE_ID' &&
+    EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID'
+  );
+};
+
 /**
- * Sends the OTP code to the seller's personal email.
- *
- * @param {object} params
- * @param {string} params.toEmail   – seller's personal email address
- * @param {string} params.toName    – seller's full name
- * @param {string} params.storeName – name of their stall/venture
- * @param {string} params.otpCode   – 6-digit OTP string
- * @returns {Promise<{ success: boolean, error?: string }>}
+ * 1. Sends the OTP code to the seller's email address.
  */
 export async function sendOtpEmail({ toEmail, toName, storeName, otpCode }) {
-  // Credentials not configured – gracefully skip sending
-  if (
-    EMAILJS_PUBLIC_KEY  === 'YOUR_PUBLIC_KEY' ||
-    EMAILJS_SERVICE_ID  === 'YOUR_SERVICE_ID' ||
-    EMAILJS_TEMPLATE_ID === 'YOUR_TEMPLATE_ID'
-  ) {
+  if (!isEmailConfigured()) {
     console.warn(
-      '[EmailJS] Credentials not configured. Set VITE_EMAILJS_PUBLIC_KEY, ' +
+      '[EmailJS] Credentials not configured. Add VITE_EMAILJS_PUBLIC_KEY, ' +
       'VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID in your .env file.'
     );
-    // Return success=false so the UI can show a fallback
     return { success: false, error: 'email_not_configured' };
   }
 
@@ -61,14 +57,103 @@ export async function sendOtpEmail({ toEmail, toName, storeName, otpCode }) {
     const emailjs = await getEmailJS();
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       to_email:    toEmail,
+      email:       toEmail,
+      user_email:  toEmail,
+      recipient:   toEmail,
       to_name:     toName,
+      name:        toName,
+      user_name:   toName,
       store_name:  storeName,
+      stall_name:  storeName,
       otp_code:    otpCode,
+      otp:         otpCode,
+      code:        otpCode,
       expiry_mins: '5',
     });
     return { success: true };
   } catch (err) {
     console.error('[EmailJS] Failed to send OTP email:', err);
+    return { success: false, error: err?.text || err?.message || 'Unknown error' };
+  }
+}
+
+/**
+ * 2. Sends order confirmation & 4-digit pickup PIN to the customer.
+ */
+export async function sendOrderConfirmationEmail({
+  toEmail,
+  toName,
+  orderId,
+  pin,
+  itemsSummary,
+  totalAmount,
+}) {
+  if (!isEmailConfigured()) {
+    console.warn('[EmailJS] Skipping order confirmation email (EmailJS not configured).');
+    return { success: false, error: 'email_not_configured' };
+  }
+
+  try {
+    const emailjs = await getEmailJS();
+    const templateId = EMAILJS_ORDER_TEMPLATE_ID;
+    await emailjs.send(EMAILJS_SERVICE_ID, templateId, {
+      to_email:      toEmail,
+      to_name:       toName,
+      order_id:      orderId,
+      pickup_pin:    pin,
+      items_summary: itemsSummary,
+      total_amount:  totalAmount,
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('[EmailJS] Failed to send Order Confirmation email:', err);
+    return { success: false, error: err?.text || err?.message || 'Unknown error' };
+  }
+}
+
+/**
+ * 3. Sends official merchant credentials to the student founder upon approval.
+ */
+export async function sendVentureApprovalEmail({
+  toEmail,
+  founderName,
+  storeName,
+  officialEmail,
+  defaultPassword,
+}) {
+  if (!isEmailConfigured()) {
+    console.warn('[EmailJS] Skipping venture approval email (EmailJS not configured).');
+    return { success: false, error: 'email_not_configured' };
+  }
+
+  try {
+    const emailjs = await getEmailJS();
+    const templateId = EMAILJS_APPROVAL_TEMPLATE_ID;
+    await emailjs.send(EMAILJS_SERVICE_ID, templateId, {
+      to_email:         toEmail,
+      email:            toEmail,
+      user_email:       toEmail,
+      recipient:        toEmail,
+      to_name:          founderName,
+      name:             founderName,
+      founder_name:     founderName,
+      user_name:        founderName,
+      store_name:       storeName,
+      stall_name:       storeName,
+      shop_name:        storeName,
+      official_email:   officialEmail,
+      username:         officialEmail,
+      user_id:          officialEmail,
+      seller_email:     officialEmail,
+      login_email:      officialEmail,
+      default_password: defaultPassword,
+      password:         defaultPassword,
+      temp_password:    defaultPassword,
+      login_url:        typeof window !== 'undefined' ? window.location.origin : '',
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('[EmailJS] Failed to send Venture Approval email:', err);
     return { success: false, error: err?.text || err?.message || 'Unknown error' };
   }
 }

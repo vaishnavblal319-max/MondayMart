@@ -13,7 +13,7 @@ export const Toast = ({ message, type = 'success', onClose, duration = 3500 }) =
   if (!message) return null;
 
   const icons = {
-    success: <CheckCircle2 size={20} color="#ccff00" />,
+    success: <CheckCircle2 size={20} color="#fff200" />,
     error: <AlertCircle size={20} color="#ff3355" />,
     info: <Info size={20} color="#06b6d4" />,
   };
@@ -32,8 +32,8 @@ export const Toast = ({ message, type = 'success', onClose, duration = 3500 }) =
         color: '#ffffff',
         padding: '0.9rem 1.35rem',
         borderRadius: '14px',
-        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(204, 255, 0, 0.15)',
-        border: '1.5px solid rgba(204, 255, 0, 0.4)',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 242, 0, 0.15)',
+        border: '1.5px solid rgba(255, 242, 0, 0.4)',
         animation: 'slideUp 0.3s ease-out',
         maxWidth: '440px',
       }}

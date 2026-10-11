@@ -8,6 +8,8 @@ import {
   Trash2,
   Edit2,
   Check,
+  ArrowRightLeft,
+  Eye,
 } from 'lucide-react';
 import { useMarket } from '../../context/MarketContext';
 import { useAuth } from '../../context/AuthContext';
@@ -15,7 +17,7 @@ import { formatCurrency } from '../../utils/helpers';
 import { OrderTicket } from './OrderTicket';
 import { AddProductModal } from './AddProductModal';
 
-export const SellerDashboard = () => {
+export const SellerDashboard = ({ onSwitchToCustomer, onSwitchToLanding }) => {
   const { products, orders, updateProduct, deleteProduct } = useMarket();
   const { currentUser } = useAuth();
 
@@ -78,8 +80,8 @@ export const SellerDashboard = () => {
             background: 'linear-gradient(135deg, #121218 0%, #09090b 100%)',
             borderRadius: '24px',
             padding: '1.75rem 2rem',
-            border: '1px solid rgba(204, 255, 0, 0.35)',
-            boxShadow: '0 12px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(204, 255, 0, 0.1)',
+            border: '1px solid rgba(255, 242, 0, 0.35)',
+            boxShadow: '0 12px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 242, 0, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -96,15 +98,37 @@ export const SellerDashboard = () => {
               <span className="badge badge-iedc">✓ IEDC Incubated Stall</span>
             </div>
             <p style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>
-              Official Account: <strong style={{ color: '#ccff00' }}>{currentUser?.email}</strong> • Student Lead: {currentUser?.name}
+              Official Account: <strong style={{ color: '#fff200' }}>{currentUser?.email}</strong> • Student Lead: {currentUser?.name}
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {onSwitchToLanding && (
+              <button
+                onClick={onSwitchToLanding}
+                className="btn btn-secondary"
+                style={{ gap: '0.45rem' }}
+                title="Browse Campus Home"
+              >
+                <ArrowRightLeft size={16} />
+                <span>Home Page</span>
+              </button>
+            )}
+            {onSwitchToCustomer && (
+              <button
+                onClick={onSwitchToCustomer}
+                className="btn btn-secondary"
+                style={{ gap: '0.45rem' }}
+                title="Preview Customer Storefront"
+              >
+                <Eye size={16} />
+                <span>View Storefront</span>
+              </button>
+            )}
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="btn btn-primary"
-              style={{ gap: '0.45rem' }}
+              style={{ gap: '0.45rem', boxShadow: '0 0 16px rgba(255, 242, 0, 0.45)', fontWeight: 800 }}
             >
               <Plus size={18} />
               <span>Add Stall Item</span>
@@ -124,9 +148,9 @@ export const SellerDashboard = () => {
           <div style={{ background: '#14141b', padding: '1.3rem', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a1a1aa', fontSize: '0.85rem', fontWeight: 600 }}>
               <span>Total Stall Revenue</span>
-              <TrendingUp size={18} color="#ccff00" />
+              <TrendingUp size={18} color="#fff200" />
             </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#ccff00', marginTop: '0.5rem', fontFamily: 'var(--font-heading)' }}>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff200', marginTop: '0.5rem', fontFamily: 'var(--font-heading)' }}>
               {formatCurrency(totalRevenue)}
             </div>
             <div style={{ fontSize: '0.75rem', color: '#34d399', marginTop: '0.25rem' }}>
@@ -134,12 +158,12 @@ export const SellerDashboard = () => {
             </div>
           </div>
 
-          <div style={{ background: '#14141b', padding: '1.3rem', borderRadius: '18px', border: '1.5px solid rgba(204, 255, 0, 0.4)', boxShadow: '0 0 15px rgba(204, 255, 0, 0.15)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccff00', fontSize: '0.85rem', fontWeight: 600 }}>
+          <div style={{ background: '#14141b', padding: '1.3rem', borderRadius: '18px', border: '1.5px solid rgba(255, 242, 0, 0.4)', boxShadow: '0 0 15px rgba(255, 242, 0, 0.15)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff200', fontSize: '0.85rem', fontWeight: 600 }}>
               <span>Active Orders</span>
-              <Clock size={18} color="#ccff00" />
+              <Clock size={18} color="#fff200" />
             </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#ccff00', marginTop: '0.5rem', fontFamily: 'var(--font-heading)' }}>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff200', marginTop: '0.5rem', fontFamily: 'var(--font-heading)' }}>
               {activeOrders.length}
             </div>
             <div style={{ fontSize: '0.75rem', color: '#a1a1aa', marginTop: '0.25rem' }}>
@@ -183,8 +207,8 @@ export const SellerDashboard = () => {
                 padding: '0.85rem 1.25rem',
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'orders' ? '3px solid #ccff00' : 'none',
-                color: activeTab === 'orders' ? '#ccff00' : '#a1a1aa',
+                borderBottom: activeTab === 'orders' ? '3px solid #fff200' : 'none',
+                color: activeTab === 'orders' ? '#fff200' : '#a1a1aa',
                 fontWeight: 800,
                 fontSize: '1.05rem',
                 cursor: 'pointer',
@@ -194,10 +218,10 @@ export const SellerDashboard = () => {
                 fontFamily: 'var(--font-heading)',
               }}
             >
-              <Clock size={18} color={activeTab === 'orders' ? '#ccff00' : '#71717a'} />
+              <Clock size={18} color={activeTab === 'orders' ? '#fff200' : '#71717a'} />
               <span>Live Orders & Pickup PINs</span>
               {activeOrders.length > 0 && (
-                <span style={{ backgroundColor: '#ccff00', color: '#000000', padding: '1px 8px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800 }}>
+                <span style={{ backgroundColor: '#fff200', color: '#000000', padding: '1px 8px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800 }}>
                   {activeOrders.length}
                 </span>
               )}
@@ -209,8 +233,8 @@ export const SellerDashboard = () => {
                 padding: '0.85rem 1.25rem',
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'inventory' ? '3px solid #ccff00' : 'none',
-                color: activeTab === 'inventory' ? '#ccff00' : '#a1a1aa',
+                borderBottom: activeTab === 'inventory' ? '3px solid #fff200' : 'none',
+                color: activeTab === 'inventory' ? '#fff200' : '#a1a1aa',
                 fontWeight: 800,
                 fontSize: '1.05rem',
                 cursor: 'pointer',
@@ -220,7 +244,7 @@ export const SellerDashboard = () => {
                 fontFamily: 'var(--font-heading)',
               }}
             >
-              <Package size={18} color={activeTab === 'inventory' ? '#ccff00' : '#71717a'} />
+              <Package size={18} color={activeTab === 'inventory' ? '#fff200' : '#71717a'} />
               <span>Menu & Stock Inventory</span>
             </button>
           </div>
@@ -236,8 +260,8 @@ export const SellerDashboard = () => {
                     padding: '0.4rem 0.95rem',
                     borderRadius: '9999px',
                     border: '1px solid',
-                    borderColor: orderFilter === f ? '#ccff00' : 'rgba(255, 255, 255, 0.12)',
-                    backgroundColor: orderFilter === f ? '#ccff00' : '#14141b',
+                    borderColor: orderFilter === f ? '#fff200' : 'rgba(255, 255, 255, 0.12)',
+                    backgroundColor: orderFilter === f ? '#fff200' : '#14141b',
                     color: orderFilter === f ? '#000000' : '#a1a1aa',
                     fontSize: '0.8rem',
                     fontWeight: 700,
@@ -363,10 +387,10 @@ export const SellerDashboard = () => {
                               type="number"
                               value={editPrice}
                               onChange={(e) => setEditPrice(e.target.value)}
-                              style={{ width: '80px', padding: '4px 8px', borderRadius: '6px', border: '1.5px solid #ccff00', background: '#09090b', color: '#fff' }}
+                              style={{ width: '80px', padding: '4px 8px', borderRadius: '6px', border: '1.5px solid #fff200', background: '#09090b', color: '#fff' }}
                             />
                           ) : (
-                            <span style={{ fontWeight: 800, color: '#ccff00', fontFamily: 'var(--font-heading)' }}>{formatCurrency(p.price)}</span>
+                            <span style={{ fontWeight: 800, color: '#fff200', fontFamily: 'var(--font-heading)' }}>{formatCurrency(p.price)}</span>
                           )}
                         </td>
 
@@ -376,7 +400,7 @@ export const SellerDashboard = () => {
                               type="number"
                               value={editQuantity}
                               onChange={(e) => setEditQuantity(e.target.value)}
-                              style={{ width: '70px', padding: '4px 8px', borderRadius: '6px', border: '1.5px solid #ccff00', background: '#09090b', color: '#fff' }}
+                              style={{ width: '70px', padding: '4px 8px', borderRadius: '6px', border: '1.5px solid #fff200', background: '#09090b', color: '#fff' }}
                             />
                           ) : (
                             <span style={{ fontWeight: 700, color: '#ffffff' }}>{p.quantity} units</span>
