@@ -23,7 +23,7 @@ export const Navbar = ({
   onOpenCart,
   onOpenOrders,
   onOpenFirebaseSetup,
-  currentView: _currentView,
+  currentView,
   setCurrentView,
 }) => {
   const { currentUser, logout, pendingSellers } = useAuth();
@@ -70,29 +70,29 @@ export const Navbar = ({
               height: '42px',
               borderRadius: '12px',
               background: '#000000',
-              border: '2px solid #ccff00',
+              border: '2px solid #fff200',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ccff00',
+              color: '#fff200',
               fontWeight: 800,
-              fontSize: '1.25rem',
-              boxShadow: '0 0 16px rgba(204, 255, 0, 0.35)',
+              fontSize: '1.3rem',
+              boxShadow: '0 0 18px rgba(255, 242, 0, 0.35)',
             }}
           >
             M⚡
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
-                Monday<span style={{ color: '#ccff00', textShadow: '0 0 10px rgba(204, 255, 0, 0.4)' }}>Market</span>
+              <span style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
+                Monday<span style={{ color: '#fff200', textShadow: '0 0 10px rgba(255, 242, 0, 0.4)' }}>Market</span>
               </span>
               <span
                 style={{
-                  background: 'rgba(204, 255, 0, 0.15)',
-                  color: '#ccff00',
-                  border: '1px solid rgba(204, 255, 0, 0.4)',
-                  fontSize: '0.62rem',
+                  background: 'rgba(255, 242, 0, 0.15)',
+                  color: '#fff200',
+                  border: '1px solid rgba(255, 242, 0, 0.4)',
+                  fontSize: '0.65rem',
                   fontWeight: 800,
                   padding: '2px 6px',
                   borderRadius: '5px',
@@ -146,10 +146,27 @@ export const Navbar = ({
                 boxShadow: '0 0 8px #34d399',
               }}
             />
-            <Wifi size={13} color="#34d399" />
-            <span>Cloud Firestore Live</span>
-          </button>
-        </div>
+            <Wifi size={13} color="#22d3ee" />
+            <span>Local Mode</span>
+          </div>
+
+          {/* Quick Demo Switcher Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowDemoMenu(!showDemoMenu)}
+              className="btn btn-secondary btn-sm"
+              style={{
+                borderRadius: '9999px',
+                borderColor: 'rgba(255, 242, 0, 0.3)',
+                backgroundColor: 'rgba(255, 242, 0, 0.08)',
+                color: '#fff200',
+                gap: '0.35rem',
+              }}
+            >
+              <Sparkles size={14} color="#fff200" />
+              <span>Demo Personas</span>
+              <ChevronDown size={14} />
+            </button>
 
         {/* Right Side: Desktop Controls & Mobile Hamburger */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -163,44 +180,64 @@ export const Navbar = ({
             {cartItemCount > 0 && (
               <span
                 style={{
-                  backgroundColor: '#000000',
-                  color: '#ccff00',
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  borderRadius: '9999px',
-                  padding: '0px 5px',
-                  border: '1px solid #ccff00',
+                  position: 'absolute',
+                  top: '120%',
+                  right: 0,
+                  background: '#121218',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '16px',
+                  boxShadow: '0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255, 242, 0, 0.1)',
+                  padding: '0.5rem',
+                  minWidth: '250px',
+                  zIndex: 1001,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.35rem',
                 }}
               >
-                {cartItemCount}
-              </span>
-            )}
-          </button>
-
-          {/* Mobile Hamburger Toggle Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="btn btn-secondary btn-sm show-mobile"
-            style={{ padding: '0.45rem', borderColor: mobileMenuOpen ? '#ccff00' : 'rgba(255, 255, 255, 0.2)', color: mobileMenuOpen ? '#ccff00' : '#ffffff' }}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-
-          {/* Desktop User Status / Action Buttons */}
-          <div className="hide-mobile" style={{ alignItems: 'center', gap: '0.75rem' }}>
-            {!currentUser ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <button onClick={onOpenLogin} className="btn btn-ghost btn-sm" style={{ color: '#ffffff' }}>
-                  Sign In
+                <div style={{ padding: '0.5rem 0.75rem', fontSize: '0.72rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  IEDC Instant Persona Switcher
+                </div>
+                <button
+                  onClick={() => handleQuickDemo('customer')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    padding: '0.65rem 0.75rem',
+                    background: 'none',
+                    border: 'none',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    transition: 'var(--transition)',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+                >
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200' }}>
+                    <User size={15} />
+                  </div>
+                  <div>
+                    <div>Rahul (Student Customer)</div>
+                    <div style={{ fontSize: '0.72rem', color: '#a1a1aa', fontWeight: 400 }}>Browse stalls & place order</div>
+                  </div>
                 </button>
                 <button
                   onClick={onOpenSellerRegister}
                   className="btn btn-secondary btn-sm"
                   style={{ borderColor: 'rgba(204, 255, 0, 0.4)', color: '#ccff00' }}
                 >
-                  <Store size={15} />
-                  <span>Launch Venture</span>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200' }}>
+                    <Store size={15} />
+                  </div>
+                  <div>
+                    <div>Chef Marco (Campus Stall)</div>
+                    <div style={{ fontSize: '0.72rem', color: '#a1a1aa', fontWeight: 400 }}>freshbakes@mondaymart.in</div>
+                  </div>
                 </button>
                 <button onClick={onOpenCustomerRegister} className="btn btn-primary btn-sm">
                   Register
@@ -270,31 +307,117 @@ export const Navbar = ({
                       )}
                     </button>
 
+          {/* User Status / Action Buttons */}
+          {!currentUser ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <button onClick={onOpenLogin} className="btn btn-ghost btn-sm" style={{ color: '#ffffff' }}>
+                Sign In
+              </button>
+              <button
+                onClick={onOpenSellerRegister}
+                className="btn btn-secondary btn-sm"
+                style={{ borderColor: 'rgba(255, 242, 0, 0.4)', color: '#fff200' }}
+              >
+                <Store size={15} />
+                <span>Launch Venture</span>
+              </button>
+              <button onClick={onOpenCustomerRegister} className="btn btn-primary btn-sm">
+                Register
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {/* Role Indicator & Portal Switcher */}
+              {currentUser.role === 'seller' ? (
+                <>
+                  {currentView !== 'seller' ? (
                     <button
-                      onClick={onOpenCart}
+                      onClick={() => setCurrentView('seller')}
                       className="btn btn-primary btn-sm"
-                      style={{ position: 'relative', gap: '0.4rem' }}
+                      title="Return to your Stall Management & Add Items"
+                      style={{
+                        gap: '0.45rem',
+                        boxShadow: '0 0 16px rgba(255, 242, 0, 0.45)',
+                        fontWeight: 800,
+                      }}
                     >
-                      <ShoppingBag size={16} />
-                      <span>Cart</span>
-                      {cartItemCount > 0 && (
-                        <span
-                          style={{
-                            backgroundColor: '#000000',
-                            color: '#ccff00',
-                            fontSize: '0.75rem',
-                            fontWeight: 800,
-                            borderRadius: '9999px',
-                            padding: '1px 7px',
-                            border: '1px solid #ccff00',
-                          }}
-                        >
-                          {cartItemCount}
-                        </span>
-                      )}
+                      <Store size={15} />
+                      <span>Seller Portal (Add Items)</span>
                     </button>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setCurrentView('landing')}
+                        className="btn btn-ghost btn-sm"
+                        title="View Home Page"
+                        style={{ gap: '0.35rem', color: '#a1a1aa' }}
+                      >
+                        <ArrowRightLeft size={14} />
+                        <span>Home</span>
+                      </button>
+                      <button
+                        onClick={() => setCurrentView('customer')}
+                        className="btn btn-ghost btn-sm"
+                        title="Preview Customer Storefront"
+                        style={{ gap: '0.35rem', color: '#a1a1aa' }}
+                      >
+                        <ShoppingBag size={14} />
+                        <span>Storefront</span>
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => setCurrentView('seller')}
+                    className="badge badge-iedc"
+                    style={{
+                      padding: '0.4rem 0.85rem',
+                      cursor: 'pointer',
+                      border: currentView === 'seller' ? '1px solid #fff200' : '1px dashed rgba(255, 242, 0, 0.5)',
+                      background: 'none',
+                    }}
+                    title="Click to open Seller Dashboard"
+                  >
+                    <Store size={14} />
+                    <span>{currentUser.storeName || 'Stall Hub'}</span>
+                  </button>
+                </>
+              ) : currentUser.role === 'admin' ? (
+                <>
+                  <button
+                    onClick={onOpenAdminApproval}
+                    className="btn btn-secondary btn-sm"
+                    style={{ borderColor: '#fff200', color: '#fff200', background: 'rgba(255, 242, 0, 0.1)' }}
+                  >
+                    <ShieldCheck size={15} />
+                    <span>Review Ventures ({pendingCount})</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Customer view controls */}
+                  <button
+                    onClick={onOpenOrders}
+                    className="btn btn-secondary btn-sm"
+                    style={{ position: 'relative', gap: '0.4rem' }}
+                  >
+                    <Clock size={16} />
+                    <span>My Orders</span>
+                    {activeCustomerOrders > 0 && (
+                      <span
+                        style={{
+                          backgroundColor: '#fff200',
+                          color: '#000000',
+                          fontSize: '0.7rem',
+                          fontWeight: 800,
+                          borderRadius: '9999px',
+                          padding: '1px 6px',
+                          boxShadow: '0 0 10px rgba(255, 242, 0, 0.5)',
+                        }}
+                      >
+                        {activeCustomerOrders}
+                      </span>
+                    )}
+                  </button>
 
                 {/* User Avatar & Logout */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.25rem' }}>
@@ -322,7 +445,23 @@ export const Navbar = ({
                     title="Sign Out"
                     style={{ padding: '0.4rem', color: '#71717a' }}
                   >
-                    <LogOut size={18} />
+                    <ShoppingBag size={16} />
+                    <span>Cart</span>
+                    {cartItemCount > 0 && (
+                      <span
+                        style={{
+                          backgroundColor: '#000000',
+                          color: '#fff200',
+                          fontSize: '0.75rem',
+                          fontWeight: 800,
+                          borderRadius: '9999px',
+                          padding: '1px 7px',
+                          border: '1px solid #fff200',
+                        }}
+                      >
+                        {cartItemCount}
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -376,7 +515,8 @@ export const Navbar = ({
                     height: '42px',
                     borderRadius: '50%',
                     objectFit: 'cover',
-                    border: '2px solid #ccff00',
+                    border: '2px solid #fff200',
+                    boxShadow: '0 0 10px rgba(255, 242, 0, 0.3)',
                   }}
                 />
                 <div>

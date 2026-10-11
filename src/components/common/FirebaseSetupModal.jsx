@@ -25,7 +25,7 @@ export const FirebaseSetupModal = ({ isOpen, onClose }) => {
           borderRadius: '24px',
           width: '100%',
           maxWidth: '480px',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(204, 255, 0, 0.1)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 242, 0, 0.1)',
           border: '1px solid rgba(255, 255, 255, 0.12)',
           overflow: 'hidden',
         }}
@@ -39,7 +39,7 @@ export const FirebaseSetupModal = ({ isOpen, onClose }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, rgba(204, 255, 0, 0.08) 0%, #121218 100%)',
+            background: 'linear-gradient(135deg, rgba(255, 242, 0, 0.08) 0%, #121218 100%)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -49,12 +49,12 @@ export const FirebaseSetupModal = ({ isOpen, onClose }) => {
                 height: '42px',
                 borderRadius: '12px',
                 backgroundColor: '#000000',
-                border: '1.5px solid #ccff00',
+                border: '1.5px solid #fff200',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ccff00',
-                boxShadow: '0 0 15px rgba(204, 255, 0, 0.3)',
+                color: '#fff200',
+                boxShadow: '0 0 15px rgba(255, 242, 0, 0.3)',
               }}
             >
               <Database size={22} />
@@ -119,7 +119,7 @@ export const FirebaseSetupModal = ({ isOpen, onClose }) => {
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                 }}
               >
-                <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.85rem', color: '#ccff00' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.85rem', color: '#fff200' }}>
                   /{col.label}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#a1a1aa', marginTop: '2px' }}>
@@ -135,7 +135,7 @@ export const FirebaseSetupModal = ({ isOpen, onClose }) => {
             target="_blank"
             rel="noreferrer"
             className="btn btn-secondary"
-            style={{ justifyContent: 'center', gap: '0.5rem', width: '100%', borderColor: 'rgba(204, 255, 0, 0.35)', color: '#ccff00' }}
+            style={{ justifyContent: 'center', gap: '0.5rem', width: '100%', borderColor: 'rgba(255, 242, 0, 0.35)', color: '#fff200' }}
           >
             <ExternalLink size={16} />
             Open in Firebase Console

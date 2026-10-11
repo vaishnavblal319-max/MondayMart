@@ -31,6 +31,12 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
     const result = await login(cleanEmail, cleanPass);
     setLoading(false);
 
+    if (!password.trim()) {
+      setError('Please enter your password');
+      return;
+    }
+
+    const result = login(email, password);
     if (result.success) {
       onSuccessLogin(result.role);
       onClose();
@@ -39,12 +45,18 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
     }
   };
 
+  const handleQuickFill = (demoEmail) => {
+    setEmail(demoEmail);
+    setPassword('');
+    setError('');
+  };
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.3)' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.3)' }}>
               <Lock size={18} />
             </div>
             <div>
@@ -92,8 +104,8 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
               lineHeight: 1.5,
             }}
           >
-            <div style={{ fontWeight: 700, color: '#ccff00', marginBottom: '0.35rem', fontFamily: 'var(--font-heading)' }}>
-              🔑 Account Access Info:
+            <div style={{ fontWeight: 700, color: '#fff200', marginBottom: '0.3rem', fontFamily: 'var(--font-heading)' }}>
+              ⚡ Smart Role Detection:
             </div>
             <ul style={{ paddingLeft: '1.2rem', margin: 0, color: '#a1a1aa' }}>
               <li>
@@ -114,7 +126,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div style={{ position: 'relative' }}>
-              <Mail size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Mail size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="email"
                 className="form-input"
@@ -130,7 +142,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
           <div className="form-group">
             <label className="form-label">Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Lock size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="password"
                 className="form-input"
@@ -161,6 +173,42 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
               </>
             )}
           </button>
+
+          {/* Quick Demo Pre-fills */}
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a1a1aa', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              ⚡ Instant Demo Credentials:
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('demo@student.com')}
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: '0.75rem', padding: '0.45rem 0.25rem', gap: '0.3rem' }}
+              >
+                <User size={13} color="#06b6d4" />
+                <span>Customer</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('freshbakes@mondaymart.in')}
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: '0.75rem', padding: '0.45rem 0.25rem', gap: '0.3rem' }}
+              >
+                <Store size={13} color="#fff200" />
+                <span>Seller</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('admin@mondaymart.in')}
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: '0.75rem', padding: '0.45rem 0.25rem', gap: '0.3rem' }}
+              >
+                <ShieldCheck size={13} color="#34d399" />
+                <span>Admin</span>
+              </button>
+            </div>
+          </div>
         </form>
 
         <div className="modal-footer" style={{ justifyContent: 'center', fontSize: '0.85rem', color: '#a1a1aa', backgroundColor: '#0d0d12' }}>
@@ -171,7 +219,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
               onClose();
               onOpenCustomerRegister();
             }}
-            style={{ background: 'none', border: 'none', color: '#ccff00', fontWeight: 700, cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: '#fff200', fontWeight: 700, cursor: 'pointer' }}
           >
             Register as Customer
           </button>

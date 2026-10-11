@@ -37,11 +37,11 @@ export const analytics = getAnalytics(app);
 // Initialize Cloud Firestore (NOT Realtime Database — this project uses Firestore)
 export const db = getFirestore(app);
 
-// ─── Firestore collection references ──────────────────────────────────────────
-export const usersCol    = () => collection(db, 'users');
-export const sellersCol  = () => collection(db, 'pendingSellers');
+// Firestore collection references
+export const usersCol = () => collection(db, 'users');
+export const sellersCol = () => collection(db, 'pendingSellers');
 export const productsCol = () => collection(db, 'products');
-export const ordersCol   = () => collection(db, 'orders');
+export const ordersCol = () => collection(db, 'orders');
 
 // ─── Re-export Firestore helpers ───────────────────────────────────────────────
 export {
@@ -59,3 +59,6 @@ export {
   serverTimestamp,
   where,
 };
+
+
+

@@ -15,8 +15,12 @@ import {
   Sparkles,
   ExternalLink,
   ShoppingBag,
+  Send,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { sendVentureApprovalEmail } from '../../utils/emailService';
 import { formatDateTime } from '../../utils/helpers';
 
 export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
@@ -26,15 +30,65 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
   const [approvalResult, setApprovalResult] = useState(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
+  const [mailStatus, setMailStatus] = useState(null);
+  const [resendingId, setResendingId] = useState(null);
 
   const pendingList = pendingSellers.filter((s) => s.status === 'pending');
   const approvedList = pendingSellers.filter((s) => s.status === 'approved');
   const totalSellers = users.filter((u) => u.role === 'seller').length;
 
+  const dispatchApprovalEmail = async (sellerUser, officialEmail, tempPassword) => {
+    const recipient = sellerUser?.personalEmail || sellerUser?.email;
+    if (!recipient) {
+      setMailStatus({ sending: false, sent: false, error: 'No founder email on record', targetEmail: '' });
+      return;
+    }
+
+    setMailStatus({ sending: true, sent: false, error: null, targetEmail: recipient });
+    try {
+      const mailRes = await sendVentureApprovalEmail({
+        toEmail: recipient,
+        founderName: sellerUser?.name || 'Venture Founder',
+        storeName: sellerUser?.storeName || 'Campus Stall',
+        officialEmail: officialEmail,
+        defaultPassword: tempPassword,
+      });
+
+      if (mailRes.success) {
+        setMailStatus({ sending: false, sent: true, error: null, targetEmail: recipient });
+      } else {
+        setMailStatus({ sending: false, sent: false, error: mailRes.error || 'Failed to dispatch email', targetEmail: recipient });
+      }
+    } catch (err) {
+      setMailStatus({ sending: false, sent: false, error: err?.message || 'Dispatch error', targetEmail: recipient });
+    }
+  };
+
   const handleApprove = async (requestId) => {
     const result = await approveSeller(requestId);
     if (result && result.success) {
       setApprovalResult(result);
+      await dispatchApprovalEmail(result.sellerUser, result.sellerEmail, result.tempPassword);
+    }
+  };
+
+  const handleResendCredentials = async (seller) => {
+    const targetEmail = seller.personalEmail || seller.email;
+    if (!targetEmail) return;
+    setResendingId(seller.id);
+    try {
+      await sendVentureApprovalEmail({
+        toEmail: targetEmail,
+        founderName: seller.ownerName || seller.name || 'Founder',
+        storeName: seller.storeName,
+        officialEmail: seller.assignedEmail || seller.email,
+        defaultPassword: seller.tempPassword || '',
+      });
+      alert(`Automated email re-sent to ${targetEmail} with username & password!`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setResendingId(null);
     }
   };
 
@@ -62,12 +116,12 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
         {/* Top Header Banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg, rgba(204, 255, 0, 0.08) 0%, rgba(18, 18, 24, 0.95) 100%)',
-            border: '1.5px solid rgba(204, 255, 0, 0.3)',
+            background: 'linear-gradient(135deg, rgba(255, 242, 0, 0.08) 0%, rgba(18, 18, 24, 0.95) 100%)',
+            border: '1.5px solid rgba(255, 242, 0, 0.3)',
             borderRadius: '24px',
             padding: '2rem 2.25rem',
             marginBottom: '2rem',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(204, 255, 0, 0.08)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 242, 0, 0.08)',
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
@@ -82,12 +136,12 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                 height: '60px',
                 borderRadius: '16px',
                 background: '#000000',
-                border: '2px solid #ccff00',
+                border: '2px solid #fff200',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ccff00',
-                boxShadow: '0 0 25px rgba(204, 255, 0, 0.3)',
+                color: '#fff200',
+                boxShadow: '0 0 25px rgba(255, 242, 0, 0.3)',
                 flexShrink: 0,
               }}
             >
@@ -100,9 +154,9 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                 </h1>
                 <span
                   style={{
-                    backgroundColor: 'rgba(204, 255, 0, 0.15)',
-                    color: '#ccff00',
-                    border: '1px solid rgba(204, 255, 0, 0.4)',
+                    backgroundColor: 'rgba(255, 242, 0, 0.15)',
+                    color: '#fff200',
+                    border: '1px solid rgba(255, 242, 0, 0.4)',
                     padding: '3px 10px',
                     borderRadius: '9999px',
                     fontSize: '0.72rem',
@@ -142,7 +196,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
           <div
             style={{
               backgroundColor: '#121217',
-              border: pendingList.length > 0 ? '1.5px solid rgba(204, 255, 0, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+              border: pendingList.length > 0 ? '1.5px solid rgba(255, 242, 0, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
               borderRadius: '16px',
               padding: '1.25rem 1.5rem',
               display: 'flex',
@@ -152,11 +206,11 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
           >
             <div>
               <div style={{ fontSize: '0.8rem', color: '#a1a1aa', fontWeight: 600 }}>Pending Review</div>
-              <div style={{ fontSize: '2rem', fontWeight: 900, color: pendingList.length > 0 ? '#ccff00' : '#ffffff', fontFamily: 'var(--font-heading)' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: pendingList.length > 0 ? '#fff200' : '#ffffff', fontFamily: 'var(--font-heading)' }}>
                 {pendingList.length}
               </div>
             </div>
-            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(204, 255, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(255, 242, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200' }}>
               <Clock size={20} />
             </div>
           </div>
@@ -228,8 +282,8 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
               padding: '1rem 1.5rem',
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'pending' ? '3px solid #ccff00' : 'none',
-              color: activeTab === 'pending' ? '#ccff00' : '#a1a1aa',
+              borderBottom: activeTab === 'pending' ? '3px solid #fff200' : 'none',
+              color: activeTab === 'pending' ? '#fff200' : '#a1a1aa',
               fontWeight: 800,
               fontSize: '0.95rem',
               cursor: 'pointer',
@@ -243,7 +297,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
             <span>Pending Applications</span>
             <span
               style={{
-                backgroundColor: pendingList.length > 0 ? '#ccff00' : 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: pendingList.length > 0 ? '#fff200' : 'rgba(255, 255, 255, 0.1)',
                 color: pendingList.length > 0 ? '#000000' : '#71717a',
                 padding: '2px 8px',
                 borderRadius: '9999px',
@@ -261,8 +315,8 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
               padding: '1rem 1.5rem',
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'approved' ? '3px solid #ccff00' : 'none',
-              color: activeTab === 'approved' ? '#ccff00' : '#a1a1aa',
+              borderBottom: activeTab === 'approved' ? '3px solid #fff200' : 'none',
+              color: activeTab === 'approved' ? '#fff200' : '#a1a1aa',
               fontWeight: 800,
               fontSize: '0.95rem',
               cursor: 'pointer',
@@ -293,15 +347,15 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
         {approvalResult && (
           <div
             style={{
-              background: 'rgba(204, 255, 0, 0.08)',
-              border: '1.5px solid #ccff00',
+              background: 'rgba(255, 242, 0, 0.08)',
+              border: '1.5px solid #fff200',
               borderRadius: '20px',
               padding: '1.5rem',
               marginBottom: '2rem',
-              boxShadow: '0 0 30px rgba(204, 255, 0, 0.2)',
+              boxShadow: '0 0 30px rgba(255, 242, 0, 0.2)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#ccff00', fontWeight: 800, marginBottom: '0.5rem', fontFamily: 'var(--font-heading)', fontSize: '1.1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#fff200', fontWeight: 800, marginBottom: '0.5rem', fontFamily: 'var(--font-heading)', fontSize: '1.1rem' }}>
               <CheckCircle2 size={24} />
               <span>VENTURE APPROVED & IEDC CREDENTIALS PROVISIONED!</span>
             </div>
@@ -315,7 +369,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                   background: '#09090b',
                   borderRadius: '14px',
                   padding: '1rem 1.25rem',
-                  border: '1px solid rgba(204, 255, 0, 0.4)',
+                  border: '1px solid rgba(255, 242, 0, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -324,7 +378,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
               >
                 <div>
                   <div style={{ fontSize: '0.75rem', color: '#a1a1aa', fontWeight: 600 }}>Assigned Seller Email:</div>
-                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ccff00', fontFamily: 'var(--font-mono)' }}>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff200', fontFamily: 'var(--font-mono)' }}>
                     {approvalResult.sellerEmail}
                   </div>
                 </div>
@@ -334,7 +388,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                   className="btn btn-secondary btn-sm"
                   style={{ gap: '0.35rem' }}
                 >
-                  {copiedEmail ? <Check size={14} color="#ccff00" /> : <Copy size={14} />}
+                  {copiedEmail ? <Check size={14} color="#fff200" /> : <Copy size={14} />}
                   <span>{copiedEmail ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
@@ -344,7 +398,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                   background: '#09090b',
                   borderRadius: '14px',
                   padding: '1rem 1.25rem',
-                  border: '1px solid rgba(204, 255, 0, 0.4)',
+                  border: '1px solid rgba(255, 242, 0, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -363,11 +417,60 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                   className="btn btn-secondary btn-sm"
                   style={{ gap: '0.35rem' }}
                 >
-                  {copiedPassword ? <Check size={14} color="#ccff00" /> : <Copy size={14} />}
+                  {copiedPassword ? <Check size={14} color="#fff200" /> : <Copy size={14} />}
                   <span>{copiedPassword ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
             </div>
+
+            {/* Automated Email Dispatch Status Banner */}
+            {mailStatus && (
+              <div
+                style={{
+                  marginBottom: '1.25rem',
+                  padding: '0.85rem 1.15rem',
+                  borderRadius: '12px',
+                  background: mailStatus.sent
+                    ? 'rgba(52, 211, 153, 0.12)'
+                    : mailStatus.sending
+                    ? 'rgba(255, 242, 0, 0.1)'
+                    : 'rgba(255, 51, 85, 0.12)',
+                  border: `1px solid ${
+                    mailStatus.sent
+                      ? 'rgba(52, 211, 153, 0.4)'
+                      : mailStatus.sending
+                      ? 'rgba(255, 242, 0, 0.4)'
+                      : 'rgba(255, 51, 85, 0.4)'
+                  }`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  fontSize: '0.88rem',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: mailStatus.sent ? '#34d399' : mailStatus.sending ? '#fff200' : '#ff3355' }}>
+                  {mailStatus.sending && <Loader2 size={18} className="spin" />}
+                  {mailStatus.sent && <CheckCircle2 size={18} />}
+                  {mailStatus.error && <AlertCircle size={18} />}
+                  <span>
+                    {mailStatus.sending && `Dispatching automated credentials email to ${mailStatus.targetEmail}...`}
+                    {mailStatus.sent && `Automated email successfully sent to ${mailStatus.targetEmail} with username & password!`}
+                    {mailStatus.error && `Email delivery notice: ${mailStatus.error} (Credentials recorded on-screen)`}
+                  </span>
+                </div>
+
+                {mailStatus.error && (
+                  <button
+                    onClick={() => dispatchApprovalEmail(approvalResult.sellerUser, approvalResult.sellerEmail, approvalResult.tempPassword)}
+                    className="btn btn-ghost btn-sm"
+                    style={{ fontSize: '0.8rem', padding: '0.3rem 0.65rem', color: '#fff200' }}
+                  >
+                    Retry Send
+                  </button>
+                )}
+              </div>
+            )}
 
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
@@ -499,8 +602,8 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                             alt="Proof document"
                             style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }}
                           />
-                          <span style={{ fontSize: '0.85rem', color: '#ccff00', fontWeight: 600 }}>Click to Zoom Document</span>
-                          <Eye size={15} color="#ccff00" />
+                          <span style={{ fontSize: '0.85rem', color: '#fff200', fontWeight: 600 }}>Click to Zoom Document</span>
+                          <Eye size={15} color="#fff200" />
                         </div>
                       </div>
                     )}
@@ -559,7 +662,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                       </div>
                       <div style={{ fontSize: '0.88rem', color: '#a1a1aa', display: 'flex', flexWrap: 'wrap', gap: '0.85rem' }}>
                         <span>Lead: <strong style={{ color: '#ffffff' }}>{seller.ownerName}</strong></span>
-                        <span>• Official Email: <strong style={{ color: '#ccff00', fontFamily: 'var(--font-mono)' }}>{seller.assignedEmail}</strong></span>
+                        <span>• Official Email: <strong style={{ color: '#fff200', fontFamily: 'var(--font-mono)' }}>{seller.assignedEmail}</strong></span>
                         {seller.tempPassword && (
                           <span>• Password: <strong style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>{seller.tempPassword}</strong></span>
                         )}
@@ -588,9 +691,23 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
                         </button>
                       )}
                       <button
+                        onClick={() => handleResendCredentials(seller)}
+                        disabled={resendingId === seller.id}
+                        className="btn btn-secondary btn-sm"
+                        style={{ gap: '0.35rem', borderColor: 'rgba(255, 255, 255, 0.15)' }}
+                        title="Resend automated email with username and password"
+                      >
+                        {resendingId === seller.id ? (
+                          <Loader2 size={14} className="spin" />
+                        ) : (
+                          <Send size={14} color="#fff200" />
+                        )}
+                        <span>{resendingId === seller.id ? 'Sending...' : 'Resend Email'}</span>
+                      </button>
+                      <button
                         onClick={() => handleDirectLogin(seller.assignedEmail, seller.tempPassword)}
                         className="btn btn-secondary btn-sm"
-                        style={{ gap: '0.45rem', borderColor: '#ccff00', color: '#ccff00' }}
+                        style={{ gap: '0.45rem', borderColor: '#fff200', color: '#fff200' }}
                       >
                         <Store size={15} />
                         <span>Open Portal</span>
@@ -619,7 +736,7 @@ export const AdminApprovalPage = ({ onSwitchToSeller, onSwitchToCustomer }) => {
               borderRadius: '20px',
               padding: '1.5rem',
               position: 'relative',
-              border: '1px solid rgba(204, 255, 0, 0.4)',
+              border: '1px solid rgba(255, 242, 0, 0.4)',
               boxShadow: '0 0 40px rgba(0, 0, 0, 0.95)',
             }}
             onClick={(e) => e.stopPropagation()}

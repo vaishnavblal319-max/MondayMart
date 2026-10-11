@@ -25,8 +25,8 @@ export const ProductCard = ({ product }) => {
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-3px)';
-        e.currentTarget.style.borderColor = '#ccff00';
-        e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(204, 255, 0, 0.2)';
+        e.currentTarget.style.borderColor = '#fff200';
+        e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 242, 0, 0.2)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
@@ -58,7 +58,7 @@ export const ProductCard = ({ product }) => {
         <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
           <span
             className="badge"
-            style={{ backgroundColor: '#000000', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.4)', backdropFilter: 'blur(4px)' }}
+            style={{ backgroundColor: '#000000', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.4)', backdropFilter: 'blur(4px)' }}
           >
             ★ {product.rating}
           </span>
@@ -109,7 +109,7 @@ export const ProductCard = ({ product }) => {
       {/* Details */}
       <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ccff00', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fff200', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {product.category}
           </span>
           {product.sellerStore && (
@@ -141,7 +141,7 @@ export const ProductCard = ({ product }) => {
         {/* Price & Add to Cart Controls */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '0.85rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
           <div>
-            <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ccff00', fontFamily: 'var(--font-heading)' }}>
+            <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#fff200', fontFamily: 'var(--font-heading)' }}>
               {formatCurrency(product.price)}
             </span>
           </div>
@@ -168,10 +168,10 @@ export const ProductCard = ({ product }) => {
                 display: 'flex',
                 alignItems: 'center',
                 backgroundColor: '#000000',
-                border: '1.5px solid #ccff00',
+                border: '1.5px solid #fff200',
                 borderRadius: '8px',
                 overflow: 'hidden',
-                boxShadow: '0 0 10px rgba(204, 255, 0, 0.25)',
+                boxShadow: '0 0 10px rgba(255, 242, 0, 0.25)',
               }}
             >
               <button
@@ -181,7 +181,7 @@ export const ProductCard = ({ product }) => {
                   border: 'none',
                   padding: '0.4rem 0.65rem',
                   cursor: 'pointer',
-                  color: '#ccff00',
+                  color: '#fff200',
                   display: 'flex',
                   alignItems: 'center',
                 }}
@@ -193,7 +193,7 @@ export const ProductCard = ({ product }) => {
                   padding: '0 0.5rem',
                   fontWeight: 800,
                   fontSize: '0.9rem',
-                  color: '#ccff00',
+                  color: '#fff200',
                   minWidth: '24px',
                   textAlign: 'center',
                   fontFamily: 'var(--font-mono)',
@@ -209,7 +209,7 @@ export const ProductCard = ({ product }) => {
                   border: 'none',
                   padding: '0.4rem 0.65rem',
                   cursor: isMaxInCart ? 'not-allowed' : 'pointer',
-                  color: isMaxInCart ? '#52525b' : '#ccff00',
+                  color: isMaxInCart ? '#52525b' : '#fff200',
                   display: 'flex',
                   alignItems: 'center',
                 }}

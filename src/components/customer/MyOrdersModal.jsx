@@ -28,7 +28,7 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
       <div className="modal-container modal-lg" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.3)' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.3)' }}>
               <Clock size={20} />
             </div>
             <div>
@@ -95,7 +95,7 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
 
                   <div style={{ borderTop: '1px dashed rgba(255, 255, 255, 0.15)', paddingTop: '0.85rem', display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#ffffff' }}>
                     <span>Total Amount:</span>
-                    <span style={{ color: '#ccff00', fontFamily: 'var(--font-heading)', fontSize: '1.1rem' }}>{formatCurrency(selectedOrder.totalAmount)}</span>
+                    <span style={{ color: '#fff200', fontFamily: 'var(--font-heading)', fontSize: '1.1rem' }}>{formatCurrency(selectedOrder.totalAmount)}</span>
                   </div>
                 </div>
               </div>
@@ -117,10 +117,10 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
                     key={order.id}
                     style={{
                       background: '#14141b',
-                      border: isActive ? '1.5px solid rgba(204, 255, 0, 0.45)' : '1px solid rgba(255, 255, 255, 0.08)',
+                      border: isActive ? '1.5px solid rgba(255, 242, 0, 0.45)' : '1px solid rgba(255, 255, 255, 0.08)',
                       borderRadius: '16px',
                       padding: '1.25rem',
-                      boxShadow: isActive ? '0 6px 20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(204, 255, 0, 0.12)' : 'var(--shadow-sm)',
+                      boxShadow: isActive ? '0 6px 20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 242, 0, 0.12)' : 'var(--shadow-sm)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
@@ -144,7 +144,7 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
                       </div>
 
                       <div style={{ fontSize: '0.85rem', color: '#d4d4d8', marginTop: '0.35rem' }}>
-                        Total: <strong style={{ color: '#ccff00' }}>{formatCurrency(order.totalAmount)}</strong>
+                        Total: <strong style={{ color: '#fff200' }}>{formatCurrency(order.totalAmount)}</strong>
                       </div>
                     </div>
 
@@ -154,7 +154,7 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
                         <div style={{ fontSize: '0.7rem', color: '#71717a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           PIN
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 800, fontSize: '1.15rem', color: '#ccff00', background: '#000000', padding: '2px 8px', borderRadius: '6px', border: '1px solid #ccff00' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 800, fontSize: '1.15rem', color: '#fff200', background: '#000000', padding: '2px 8px', borderRadius: '6px', border: '1px solid #fff200' }}>
                           {order.pin}
                         </div>
                       </div>
@@ -164,7 +164,7 @@ export const MyOrdersModal = ({ isOpen, onClose }) => {
                         className="btn btn-secondary btn-sm"
                         style={{ gap: '0.45rem' }}
                       >
-                        <QrCode size={16} color="#ccff00" />
+                        <QrCode size={16} color="#fff200" />
                         <span>View QR Pass</span>
                         <ChevronRight size={14} />
                       </button>

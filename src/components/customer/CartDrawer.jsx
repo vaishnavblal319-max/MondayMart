@@ -93,7 +93,7 @@ export const CartDrawer = ({ isOpen, onClose, onOrderPlaced }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200' }}>
               <ShoppingBag size={18} />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
@@ -167,17 +167,17 @@ export const CartDrawer = ({ isOpen, onClose, onOrderPlaced }) => {
                         display: 'flex',
                         alignItems: 'center',
                         backgroundColor: '#000000',
-                        border: '1.5px solid #ccff00',
+                        border: '1.5px solid #fff200',
                         borderRadius: '8px',
                       }}
                     >
                       <button
                         onClick={() => removeFromCart(product.id)}
-                        style={{ border: 'none', background: 'none', padding: '4px 6px', cursor: 'pointer', color: '#ccff00' }}
+                        style={{ border: 'none', background: 'none', padding: '4px 6px', cursor: 'pointer', color: '#fff200' }}
                       >
                         <Minus size={13} />
                       </button>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 800, padding: '0 4px', minWidth: '20px', textAlign: 'center', color: '#ccff00', fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, padding: '0 4px', minWidth: '20px', textAlign: 'center', color: '#fff200', fontFamily: 'var(--font-mono)' }}>
                         {quantity}
                       </span>
                       <button
@@ -188,14 +188,14 @@ export const CartDrawer = ({ isOpen, onClose, onOrderPlaced }) => {
                           background: 'none',
                           padding: '4px 6px',
                           cursor: quantity >= product.quantity ? 'not-allowed' : 'pointer',
-                          color: quantity >= product.quantity ? '#52525b' : '#ccff00',
+                          color: quantity >= product.quantity ? '#52525b' : '#fff200',
                         }}
                       >
                         <Plus size={13} />
                       </button>
                     </div>
 
-                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ccff00', minWidth: '60px', textAlign: 'right', fontFamily: 'var(--font-heading)' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff200', minWidth: '60px', textAlign: 'right', fontFamily: 'var(--font-heading)' }}>
                       {formatCurrency(product.price * quantity)}
                     </div>
                   </div>
@@ -212,7 +212,7 @@ export const CartDrawer = ({ isOpen, onClose, onOrderPlaced }) => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.85rem', color: '#ffffff' }}>
-                  <MapPin size={16} color="#ccff00" />
+                  <MapPin size={16} color="#fff200" />
                   <span>Pickup & Verification Details</span>
                 </div>
 
@@ -312,15 +312,15 @@ export const CartDrawer = ({ isOpen, onClose, onOrderPlaced }) => {
                   }}
                 >
                   <span>To Pay</span>
-                  <span style={{ color: '#ccff00', fontFamily: 'var(--font-heading)' }}>{formatCurrency(grandTotal)}</span>
+                  <span style={{ color: '#fff200', fontFamily: 'var(--font-heading)' }}>{formatCurrency(grandTotal)}</span>
                 </div>
               </div>
 
               {/* QR Verification Reminder */}
               <div
                 style={{
-                  backgroundColor: 'rgba(204, 255, 0, 0.08)',
-                  border: '1px solid rgba(204, 255, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 242, 0, 0.08)',
+                  border: '1px solid rgba(255, 242, 0, 0.3)',
                   borderRadius: '12px',
                   padding: '0.85rem 1rem',
                   fontSize: '0.8rem',
@@ -330,7 +330,7 @@ export const CartDrawer = ({ isOpen, onClose, onOrderPlaced }) => {
                   gap: '0.6rem',
                 }}
               >
-                <Sparkles size={18} color="#ccff00" flexShrink={0} />
+                <Sparkles size={18} color="#fff200" flexShrink={0} />
                 <span>
                   Placing this order immediately generates your verified <strong>QR Pass & Random 4-digit PIN</strong> for pickup!
                 </span>

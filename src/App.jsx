@@ -9,7 +9,7 @@ import { CustomerRegisterModal } from './components/landing/CustomerRegisterModa
 import { SellerRegisterModal } from './components/seller-onboarding/SellerRegisterModal';
 import { OtpVerificationModal } from './components/seller-onboarding/OtpVerificationModal';
 import { AdminApprovalModal } from './components/admin/AdminApprovalModal';
-import { AdminApprovalPage } from './components/admin/AdminApprovalPage';
+import { AdminPostersModal } from './components/admin/AdminPostersModal';
 import { CustomerDashboard } from './components/customer/CustomerDashboard';
 import { CartDrawer } from './components/customer/CartDrawer';
 import { OrderSuccessModal } from './components/customer/OrderSuccessModal';
@@ -40,6 +40,7 @@ const MainApp = () => {
   const [isSellerRegisterOpen, setIsSellerRegisterOpen] = useState(false);
   const [isOtpOpen, setIsOtpOpen] = useState(false);
   const [isAdminApprovalOpen, setIsAdminApprovalOpen] = useState(false);
+  const [isAdminPostersOpen, setIsAdminPostersOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isFirebaseSetupOpen, setIsFirebaseSetupOpen] = useState(false);
@@ -86,7 +87,16 @@ const MainApp = () => {
   };
 
   const handleApplicationSubmitted = () => {
-    showToast('Phone verified! Seller application sent to Admin queue.', 'success');
+    showToast('Email verified! Seller application sent to Admin queue.', 'success');
+  };
+
+  // Only allow admins to open the approval console
+  const handleOpenAdminApproval = () => {
+    if (currentUser?.role === 'admin') {
+      setIsAdminApprovalOpen(true);
+    } else {
+      showToast('Admin access only. Please log in as admin.', 'error');
+    }
   };
 
   const handleOrderPlaced = (order) => {
@@ -120,7 +130,7 @@ const MainApp = () => {
         onOpenLogin={() => setIsLoginOpen(true)}
         onOpenCustomerRegister={() => setIsCustomerRegisterOpen(true)}
         onOpenSellerRegister={() => setIsSellerRegisterOpen(true)}
-        onOpenAdminApproval={() => setCurrentView('admin')}
+        onOpenAdminApproval={handleOpenAdminApproval}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenOrders={() => setIsOrdersOpen(true)}
         onOpenFirebaseSetup={() => setIsFirebaseSetupOpen(true)}
@@ -134,6 +144,8 @@ const MainApp = () => {
             onOpenSellerRegister={() => setIsSellerRegisterOpen(true)}
             onOpenCustomerRegister={() => setIsCustomerRegisterOpen(true)}
             onOpenLogin={() => setIsLoginOpen(true)}
+            onOpenAdminPosters={() => setIsAdminPostersOpen(true)}
+            onSwitchToSeller={() => setCurrentView('seller')}
           />
         )}
 
@@ -144,12 +156,10 @@ const MainApp = () => {
           />
         )}
 
-        {currentView === 'seller' && <SellerDashboard />}
-
-        {currentView === 'admin' && (
-          <AdminApprovalPage
-            onSwitchToSeller={() => setCurrentView('seller')}
+        {currentView === 'seller' && (
+          <SellerDashboard
             onSwitchToCustomer={() => setCurrentView('customer')}
+            onSwitchToLanding={() => setCurrentView('landing')}
           />
         )}
       </main>
@@ -184,13 +194,17 @@ const MainApp = () => {
         onClose={() => setIsOtpOpen(false)}
         sellerData={sellerRegData}
         onApplicationSubmitted={handleApplicationSubmitted}
-        onOpenAdminApproval={() => setIsAdminApprovalOpen(true)}
       />
 
       <AdminApprovalModal
         isOpen={isAdminApprovalOpen}
         onClose={() => setIsAdminApprovalOpen(false)}
         onSwitchToSeller={() => setCurrentView('seller')}
+      />
+
+      <AdminPostersModal
+        isOpen={isAdminPostersOpen}
+        onClose={() => setIsAdminPostersOpen(false)}
       />
 
       <CartDrawer

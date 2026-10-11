@@ -44,7 +44,7 @@ export const SellerRegisterModal = ({
       <div className="modal-container modal-lg" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.3)' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.3)' }}>
               <Store size={20} />
             </div>
             <div>
@@ -61,8 +61,8 @@ export const SellerRegisterModal = ({
           {/* Info Banner */}
           <div
             style={{
-              backgroundColor: 'rgba(204, 255, 0, 0.08)',
-              border: '1px solid rgba(204, 255, 0, 0.35)',
+              backgroundColor: 'rgba(255, 242, 0, 0.08)',
+              border: '1px solid rgba(255, 242, 0, 0.35)',
               borderRadius: '12px',
               padding: '0.95rem 1.1rem',
               marginBottom: '1.5rem',
@@ -73,7 +73,7 @@ export const SellerRegisterModal = ({
               gap: '0.85rem',
             }}
           >
-            <ShieldCheck size={24} color="#ccff00" flexShrink={0} />
+            <ShieldCheck size={24} color="#fff200" flexShrink={0} />
             <div>
               <strong>IEDC Incubation Protocol:</strong> Once you verify your mobile phone via OTP, your application is queued for IEDC admin review. Upon approval, an official <code>yourstall@mondaymart.in</code> merchant account is issued.
             </div>
@@ -83,7 +83,7 @@ export const SellerRegisterModal = ({
             <div className="form-group">
               <label className="form-label">Stall / Venture Name</label>
               <div style={{ position: 'relative' }}>
-                <Store size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <Store size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
                   className="form-input"
@@ -99,7 +99,7 @@ export const SellerRegisterModal = ({
             <div className="form-group">
               <label className="form-label">Student Founder Full Name</label>
               <div style={{ position: 'relative' }}>
-                <User size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <User size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
                   className="form-input"
@@ -115,7 +115,7 @@ export const SellerRegisterModal = ({
             <div className="form-group">
               <label className="form-label">Personal / College Email</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <Mail size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="email"
                   className="form-input"
@@ -131,7 +131,7 @@ export const SellerRegisterModal = ({
             <div className="form-group">
               <label className="form-label">Mobile Phone Number</label>
               <div style={{ position: 'relative' }}>
-                <Phone size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <Phone size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="tel"
                   className="form-input"
@@ -163,7 +163,7 @@ export const SellerRegisterModal = ({
             <div className="form-group">
               <label className="form-label">Campus Stall Location / Quad</label>
               <div style={{ position: 'relative' }}>
-                <MapPin size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <MapPin size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
                   className="form-input"
@@ -192,7 +192,7 @@ export const SellerRegisterModal = ({
             >
               <label
                 style={{
-                  border: '2px dashed rgba(204, 255, 0, 0.45)',
+                  border: '2px dashed rgba(255, 242, 0, 0.45)',
                   borderRadius: '16px',
                   padding: '1.5rem 1rem',
                   textAlign: 'center',
@@ -205,7 +205,7 @@ export const SellerRegisterModal = ({
                   transition: 'var(--transition)',
                 }}
               >
-                <Upload size={24} color="#ccff00" />
+                <Upload size={24} color="#fff200" />
                 <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff' }}>
                   Click to upload College ID / Proof
                 </span>

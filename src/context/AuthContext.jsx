@@ -177,13 +177,18 @@ export const AuthProvider = ({ children }) => {
 
     // ── 2. Seller Login (@mondaymart.in) ──
     if (cleanEmail.endsWith('@mondaymart.in')) {
-      const seller = await findUserByEmail(cleanEmail);
-
-      if (!seller || seller.role !== 'seller') {
-        return {
-          success: false,
-          error: 'No approved seller account found with this email. Please apply through seller registration and wait for admin approval.',
-        };
+      const seller = users.find(
+        (u) => u.email.toLowerCase() === cleanEmail && u.role === 'seller'
+      );
+      if (seller) {
+        if (seller.tempPassword && password && password.trim() !== seller.tempPassword) {
+          return {
+            success: false,
+            error: 'Incorrect password. Please use the password issued upon approval.',
+          };
+        }
+        setCurrentUser(seller);
+        return { success: true, user: seller, role: 'seller' };
       }
 
       // Check against current Firestore password
@@ -206,13 +211,34 @@ export const AuthProvider = ({ children }) => {
       };
     }
 
-    // Check against current Firestore password
-    if (customer.password && cleanPassword !== customer.password) {
-      return { success: false, error: 'Incorrect password for this account.' };
+    // Customer — existing account
+    const existing = users.find((u) => u.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      if (existing.password && password && password.trim() !== existing.password) {
+        return {
+          success: false,
+          error: 'Incorrect password for this account.',
+        };
+      }
+      setCurrentUser(existing);
+      return { success: true, user: existing, role: existing.role };
     }
 
-    setCurrentUser(customer);
-    return { success: true, user: customer, role: customer.role || 'customer' };
+    // Customer — auto-register on first login
+    const namePart     = cleanEmail.split('@')[0];
+    const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    const newCustomer  = {
+      id:        `user-c-${Date.now()}`,
+      name:      formattedName,
+      email:     cleanEmail,
+      phone:     '',
+      role:      'customer',
+      avatar:    `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanEmail}`,
+      createdAt: new Date().toISOString(),
+    };
+    setUsers((prev) => [...prev, newCustomer]);
+    setCurrentUser(newCustomer);
+    return { success: true, user: newCustomer, role: 'customer' };
   };
 
   // ─── Register Customer ────────────────────────────────────────────────────────
@@ -263,14 +289,15 @@ export const AuthProvider = ({ children }) => {
     const id = `req-${Date.now()}`;
     const newApp = {
       id,
-      ownerName:       appData.ownerName.trim(),
-      storeName:       appData.storeName.trim(),
-      personalEmail:   cleanEmail,
-      phone:           appData.phone.trim(),
-      category:        appData.category || 'General',
-      address:         appData.address  || 'Campus',
-      idPhotoUrl:      appData.idPhotoUrl || '',
-      submittedAt:     new Date().toISOString(),
+      ownerName:     appData?.ownerName || 'Student Founder',
+      storeName:     appData?.storeName || 'Stall Venture',
+      personalEmail: (appData?.personalEmail || appData?.email || '').trim().toLowerCase(),
+      phone:         appData?.phone || '',
+      category:      appData?.category || 'General Food & Bakes',
+      address:       appData?.address  || 'Campus Stall',
+      idPhotoUrl:    appData?.idPhotoUrl ||
+                     'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
+      submittedAt:   new Date().toISOString(),
       isPhoneVerified: true,
       status:          'pending',
     };

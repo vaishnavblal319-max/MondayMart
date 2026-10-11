@@ -49,7 +49,7 @@ export const CustomerRegisterModal = ({ isOpen, onClose, onOpenLogin, onSuccess 
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.3)' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.3)' }}>
               <User size={18} />
             </div>
             <div>
@@ -87,7 +87,7 @@ export const CustomerRegisterModal = ({ isOpen, onClose, onOpenLogin, onSuccess 
           <div className="form-group">
             <label className="form-label">Full Name</label>
             <div style={{ position: 'relative' }}>
-              <User size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <User size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 className="form-input"
@@ -103,7 +103,7 @@ export const CustomerRegisterModal = ({ isOpen, onClose, onOpenLogin, onSuccess 
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div style={{ position: 'relative' }}>
-              <Mail size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Mail size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="email"
                 className="form-input"
@@ -119,7 +119,7 @@ export const CustomerRegisterModal = ({ isOpen, onClose, onOpenLogin, onSuccess 
           <div className="form-group">
             <label className="form-label">Mobile Number (Optional)</label>
             <div style={{ position: 'relative' }}>
-              <Phone size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Phone size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="tel"
                 className="form-input"
@@ -134,7 +134,7 @@ export const CustomerRegisterModal = ({ isOpen, onClose, onOpenLogin, onSuccess 
           <div className="form-group">
             <label className="form-label">Create Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock size={18} color="#ccff00" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Lock size={18} color="#fff200" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="password"
                 className="form-input"
@@ -175,7 +175,7 @@ export const CustomerRegisterModal = ({ isOpen, onClose, onOpenLogin, onSuccess 
               onClose();
               onOpenLogin();
             }}
-            style={{ background: 'none', border: 'none', color: '#ccff00', fontWeight: 700, cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: '#fff200', fontWeight: 700, cursor: 'pointer' }}
           >
             Sign In here
           </button>

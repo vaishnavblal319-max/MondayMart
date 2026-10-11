@@ -12,7 +12,7 @@ export const OrderSuccessModal = ({ isOpen, onClose, order, onOpenOrders }) => {
           particleCount: 90,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#ccff00', '#ffffff', '#10b981', '#06b6d4'],
+          colors: ['#fff200', '#ffffff', '#10b981', '#06b6d4'],
         });
       } catch (e) {
         // confetti fallback
@@ -39,7 +39,7 @@ export const OrderSuccessModal = ({ isOpen, onClose, order, onOpenOrders }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '530px' }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(204, 255, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccff00', border: '1px solid rgba(204, 255, 0, 0.3)' }}>
+            <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(255, 242, 0, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff200', border: '1px solid rgba(255, 242, 0, 0.3)' }}>
               <CheckCircle2 size={18} />
             </div>
             <div>
@@ -72,8 +72,8 @@ export const OrderSuccessModal = ({ isOpen, onClose, order, onOpenOrders }) => {
                   left: '10%',
                   width: `${(currentStep - 1) * 33.3}%`,
                   height: '2px',
-                  backgroundColor: '#ccff00',
-                  boxShadow: '0 0 10px rgba(204, 255, 0, 0.5)',
+                  backgroundColor: '#fff200',
+                  boxShadow: '0 0 10px rgba(255, 242, 0, 0.5)',
                   zIndex: 2,
                   transition: 'width 0.4s ease',
                 }}
@@ -91,16 +91,16 @@ export const OrderSuccessModal = ({ isOpen, onClose, order, onOpenOrders }) => {
                       width: '22px',
                       height: '22px',
                       borderRadius: '50%',
-                      backgroundColor: currentStep >= item.step ? '#ccff00' : '#14141b',
+                      backgroundColor: currentStep >= item.step ? '#fff200' : '#14141b',
                       color: currentStep >= item.step ? '#000000' : '#71717a',
-                      border: currentStep >= item.step ? '2px solid #ccff00' : '2px solid rgba(255, 255, 255, 0.2)',
+                      border: currentStep >= item.step ? '2px solid #fff200' : '2px solid rgba(255, 255, 255, 0.2)',
                       margin: '0 auto 0.35rem',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '0.7rem',
                       fontWeight: 800,
-                      boxShadow: currentStep >= item.step ? '0 0 10px rgba(204, 255, 0, 0.4)' : 'none',
+                      boxShadow: currentStep >= item.step ? '0 0 10px rgba(255, 242, 0, 0.4)' : 'none',
                     }}
                   >
                     {item.step}
@@ -112,7 +112,7 @@ export const OrderSuccessModal = ({ isOpen, onClose, order, onOpenOrders }) => {
               ))}
             </div>
 
-            <div style={{ fontSize: '0.82rem', color: '#ccff00', fontWeight: 700, marginTop: '0.65rem' }}>
+            <div style={{ fontSize: '0.82rem', color: '#fff200', fontWeight: 700, marginTop: '0.65rem' }}>
               {order.status === 'pending' && '🍳 Stall kitchen has received your order!'}
               {order.status === 'preparing' && '🔥 Student chef is preparing your item!'}
               {order.status === 'ready_for_pickup' && '🔔 Ready for pickup! Flash your pass at the stall counter.'}
@@ -153,7 +153,7 @@ export const OrderSuccessModal = ({ isOpen, onClose, order, onOpenOrders }) => {
             ))}
             <div style={{ borderTop: '1px dashed rgba(255, 255, 255, 0.12)', paddingTop: '0.5rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#ffffff' }}>
               <span>Total Paid:</span>
-              <span style={{ color: '#ccff00', fontFamily: 'var(--font-heading)' }}>{formatCurrency(order.totalAmount)}</span>
+              <span style={{ color: '#fff200', fontFamily: 'var(--font-heading)' }}>{formatCurrency(order.totalAmount)}</span>
             </div>
           </div>
         </div>
