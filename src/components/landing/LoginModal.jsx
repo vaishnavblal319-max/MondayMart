@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, Mail, Store, User, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
+import { X, Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSellerRegister, onSuccessLogin }) => {
@@ -7,17 +7,29 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!email.trim()) {
+    const cleanEmail = email.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanEmail) {
       setError('Please enter your email address');
       return;
     }
+    if (!cleanPass) {
+      setError('Please enter your password');
+      return;
+    }
+
+    setLoading(true);
+    const result = await login(cleanEmail, cleanPass);
+    setLoading(false);
 
     if (!password.trim()) {
       setError('Please enter your password');
@@ -89,7 +101,7 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
               marginBottom: '1.25rem',
               fontSize: '0.82rem',
               color: '#d4d4d8',
-              lineHeight: 1.45,
+              lineHeight: 1.5,
             }}
           >
             <div style={{ fontWeight: 700, color: '#fff200', marginBottom: '0.3rem', fontFamily: 'var(--font-heading)' }}>
@@ -97,10 +109,16 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
             </div>
             <ul style={{ paddingLeft: '1.2rem', margin: 0, color: '#a1a1aa' }}>
               <li>
-                <strong style={{ color: '#ffffff' }}>Student Stalls:</strong> Log in with your approved <code>@mondaymart.in</code> email.
+                <strong style={{ color: '#ffffff' }}>Admin 1:</strong> <code>admin@mondaymart.in</code> (Pass: <code>Admin123</code>)
               </li>
               <li>
-                <strong style={{ color: '#ffffff' }}>Campus Customers:</strong> Log in with your personal email (e.g. gmail).
+                <strong style={{ color: '#ffffff' }}>Admin 2:</strong> <code>iedc@mondaymart.in</code> (Pass: <code>iedc123</code>)
+              </li>
+              <li>
+                <strong style={{ color: '#ffffff' }}>Sellers:</strong> Log in with your approved <code>@mondaymart.in</code> email & assigned password.
+              </li>
+              <li>
+                <strong style={{ color: '#ffffff' }}>Customers:</strong> Log in with your registered email and password.
               </li>
             </ul>
           </div>
@@ -137,9 +155,23 @@ export const LoginModal = ({ isOpen, onClose, onOpenCustomerRegister, onOpenSell
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.9rem', marginTop: '0.5rem' }}>
-            <span>Sign In</span>
-            <ArrowRight size={16} />
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary"
+            style={{ width: '100%', padding: '0.9rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Checking Database...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In</span>
+                <ArrowRight size={16} />
+              </>
+            )}
           </button>
 
           {/* Quick Demo Pre-fills */}

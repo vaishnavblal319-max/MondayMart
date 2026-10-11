@@ -13,7 +13,7 @@ export const SellerRegisterModal = ({
     phone: '',
     category: 'Fast Food',
     address: '',
-    idPhotoUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
+    idPhotoUrl: '',
   });
 
   const [previewId, setPreviewId] = useState(formData.idPhotoUrl);
@@ -79,7 +79,7 @@ export const SellerRegisterModal = ({
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Stall / Venture Name</label>
               <div style={{ position: 'relative' }}>

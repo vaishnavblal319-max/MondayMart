@@ -64,7 +64,7 @@ export const FirebaseSetupModal = ({ isOpen, onClose }) => {
                 Firebase Cloud Firestore
               </h2>
               <p style={{ fontSize: '0.8rem', color: '#a1a1aa', margin: '2px 0 0' }}>
-                monday-market-8cf15 · Live sync active
+                {import.meta.env.VITE_FIREBASE_PROJECT_ID || 'monday-mart-27b80'} · Live sync active
               </p>
             </div>
           </div>
@@ -131,7 +131,7 @@ export const FirebaseSetupModal = ({ isOpen, onClose }) => {
 
           {/* Link to console */}
           <a
-            href="https://console.firebase.google.com/project/monday-market-8cf15/firestore"
+            href={`https://console.firebase.google.com/project/${import.meta.env.VITE_FIREBASE_PROJECT_ID || 'monday-mart-27b80'}/firestore`}
             target="_blank"
             rel="noreferrer"
             className="btn btn-secondary"

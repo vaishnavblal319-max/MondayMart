@@ -274,9 +274,6 @@ export const OtpVerificationModal = ({
                   onPaste={handlePaste}
                   className="pin-digit-box"
                   style={{
-                    width: '46px',
-                    height: '54px',
-                    fontSize: '1.5rem',
                     textAlign: 'center',
                     border: digit ? '2px solid #fff200' : '2px solid rgba(255, 255, 255, 0.15)',
                     backgroundColor: digit ? '#09090b' : '#181824',

@@ -865,7 +865,7 @@ export const LandingPage = ({
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))', gap: '1.75rem' }}>
             {/* Customer Column */}
             <div
               style={{
@@ -1010,7 +1010,7 @@ export const LandingPage = ({
             style={{
               background: 'linear-gradient(135deg, #111116 0%, #000000 100%)',
               borderRadius: '24px',
-              padding: '3.5rem 2.5rem',
+              padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 2.5rem)',
               color: '#ffffff',
               display: 'flex',
               flexWrap: 'wrap',
