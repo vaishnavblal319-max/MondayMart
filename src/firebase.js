@@ -31,10 +31,10 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 // Firestore collection references
-export const usersCol      = () => collection(db, 'users');
-export const sellersCol    = () => collection(db, 'pendingSellers');
-export const productsCol   = () => collection(db, 'products');
-export const ordersCol     = () => collection(db, 'orders');
+export const usersCol = () => collection(db, 'users');
+export const sellersCol = () => collection(db, 'pendingSellers');
+export const productsCol = () => collection(db, 'products');
+export const ordersCol = () => collection(db, 'orders');
 
 // Re-export Firestore helpers
 export {
@@ -50,3 +50,6 @@ export {
   getDocs,
   serverTimestamp,
 };
+
+
+

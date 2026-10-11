@@ -4,7 +4,7 @@ Welcome to **MondayMart**! This guide is written for anyone brand new to the pla
 
 Because MondayMart operates on a live, real database (Firebase Cloud Firestore) with **zero hardcoded dummy data**, all data in the system (stores, items, orders) is created dynamically through the natural user flow.
 
-Here is the exact step-by-step path to test and experience all features from scratch.
+Here is the exact step-by-step path to test and experience all features from scratch....
 
 ---
 
